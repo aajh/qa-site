@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Message from './message';
+import Questions from './questions';
 
 ReactDOM.render(
-    <Message />,
+    <Questions />,
     document.getElementById('react-container')
 )

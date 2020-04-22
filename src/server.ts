@@ -5,6 +5,8 @@ import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 
+import api from './api';
+
 dotenv.config()
 const app = express();
 
@@ -16,11 +18,8 @@ app.use(webpackDevMiddleware(compiler, {
 }))
 app.use(webpackHotMiddleware(compiler))
 
-
-app.get("/hello", (req, res) => {
-  res.send('Hello world!');
-});
-
+app.use(express.json())
+app.use('/api', api);
 
 const port = process.env.PORT ?? 8080;
 app.listen(port, () => {
