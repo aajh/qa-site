@@ -7,7 +7,7 @@ const router = express.Router();
 
 interface Question {
     id:         string
-    questioner: string,
+    author: string,
     title:      string,
     body:       string,
     created:    Date
@@ -16,21 +16,21 @@ interface Question {
 const questions: Question[] = require('../test_data/questions.json').map((q: any) => { return {...q, created: new Date(q.created)}});
 
 router.get('/questions', (req, res) => {
-    const json_response: api.QuestionSummary[] = questions.map(({ id, questioner, title, created }) => { return {
-        id, questioner, title,
-        created: created.toString()
+    const json_response: api.QuestionSummary[] = questions.map(({ id, author, title, created }) => { return {
+        id, author, title,
+        created: created.toISOString()
     }});
     res.json(json_response);
 })
 
 router.get('/questions/:id', (req, res) => {
     const question = questions.find(q => q.id === req.params.id);
-    if (questions === undefined) {
+    if (question === undefined) {
         res.status(404).end();
     } else {
         const json_response: api.Question = {
             ...question,
-            created: question.created.toString()
+            created: question.created.toISOString()
         };
         res.json(json_response);
     }
@@ -42,15 +42,15 @@ router.post('/questions', (req, res) => {
         return;
     }
 
-    const { questioner, title, body } = req.body;
-    if (questioner === undefined || title === undefined || body === undefined) {
+    const { author, title, body } = req.body;
+    if (author === undefined || title === undefined || body === undefined) {
         res.status(400).end();
         return;
     }
 
     const question: Question = {
         id: uuidv4(),
-        questioner,
+        author,
         title,
         body,
         created: new Date()
@@ -59,7 +59,7 @@ router.post('/questions', (req, res) => {
 
     const json_response: api.Question = {
         ...question,
-        created: question.created.toString()
+        created: question.created.toISOString()
     };
     res.json(json_response);
 });

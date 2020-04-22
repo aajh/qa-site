@@ -1,6 +1,6 @@
 export interface Question {
     id:         string
-    questioner: string,
+    author:     string,
     title:      string,
     body:       string
     created:    string,
@@ -8,7 +8,7 @@ export interface Question {
 
 export interface QuestionSummary {
     id:         string
-    questioner: string,
+    author:     string,
     title:      string,
     created:    string
 }

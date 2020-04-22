@@ -1,5 +1,6 @@
 import React from 'react';
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 import * as api from './api-types';
 
@@ -10,14 +11,15 @@ type QuestionProps = {
 function Question({ question }: QuestionProps): React.ReactElement {
     return (
         <li>
-            <h2>{ question.title }</h2>
-            <span>{ question.created }</span>
-            <span>{ question.questioner }</span>
+            <h2>{question.title}</h2>
+            <span>{question.created}</span>
+            <span>{question.author}</span>
+            <Link to={`/questions/${question.id}`}>Go-to</Link>
         </li>
     )
 }
 
-function Questions(): React.ReactElement {
+export default function Questions(): React.ReactElement {
     const [questions, setQuestions] = useState([] as api.QuestionSummary[]);
 
     useEffect(() => {
@@ -33,10 +35,8 @@ function Questions(): React.ReactElement {
         <div>
             <h1>Q&A</h1>
             <ul>
-                { questions.map(q => <Question key={q.id} question={q} />) }
+                {questions.map(q => <Question key={q.id} question={q} />)}
             </ul>
         </div>
     );
 }
-
-export default Questions
