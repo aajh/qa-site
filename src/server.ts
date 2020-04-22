@@ -1,10 +1,12 @@
 import express from 'express';
+import dotenv from 'dotenv';
+
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 
+dotenv.config()
 const app = express();
-const port = 8080;
 
 // Webpack dev and hot reload configuration
 const webpack_config = require('../webpack.config.js');
@@ -14,10 +16,13 @@ app.use(webpackDevMiddleware(compiler, {
 }))
 app.use(webpackHotMiddleware(compiler))
 
+
 app.get("/hello", (req, res) => {
   res.send('Hello world!');
 });
 
+
+const port = process.env.PORT ?? 8080;
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
 });
