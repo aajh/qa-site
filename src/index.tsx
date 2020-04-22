@@ -3,15 +3,22 @@ import ReactDOM from 'react-dom';
 import {
     BrowserRouter as Router,
     Switch,
-    Route
+    Route,
+    NavLink
 } from 'react-router-dom';
 
+import Ask from './ask';
 import Question from './question';
 import Questions from './questions';
 
 ReactDOM.render(
     <Router>
+        <nav>
+            <NavLink exact to="/">Home</NavLink>
+            <NavLink to="/questions/ask">Ask</NavLink>
+        </nav>
         <Switch>
+            <Route path="/questions/ask" component={Ask} />
             <Route path="/questions/:id" component={Question} />
             <Route exact path="/" component={Questions} />
             <Route path="*">

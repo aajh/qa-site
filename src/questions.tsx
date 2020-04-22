@@ -23,12 +23,12 @@ export default function Questions(): React.ReactElement {
     const [questions, setQuestions] = useState([] as api.QuestionSummary[]);
 
     useEffect(() => {
-        async function fetch_questions() {
+        async function fetchQuestions() {
             const response = await fetch('/api/questions');
             const questions: api.QuestionSummary[] = await response.json();
             setQuestions(questions);
         }
-        fetch_questions();
+        fetchQuestions();
     }, []);
 
     return (

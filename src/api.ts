@@ -16,11 +16,11 @@ interface Question {
 const questions: Question[] = require('../test_data/questions.json').map((q: any) => { return {...q, created: new Date(q.created)}});
 
 router.get('/questions', (req, res) => {
-    const json_response: api.QuestionSummary[] = questions.map(({ id, author, title, created }) => { return {
+    const jsonResponse: api.QuestionSummary[] = questions.map(({ id, author, title, created }) => { return {
         id, author, title,
         created: created.toISOString()
     }});
-    res.json(json_response);
+    res.json(jsonResponse);
 })
 
 router.get('/questions/:id', (req, res) => {
@@ -28,11 +28,11 @@ router.get('/questions/:id', (req, res) => {
     if (question === undefined) {
         res.status(404).end();
     } else {
-        const json_response: api.Question = {
+        const jsonResponse: api.Question = {
             ...question,
             created: question.created.toISOString()
         };
-        res.json(json_response);
+        res.json(jsonResponse);
     }
 })
 
@@ -57,11 +57,11 @@ router.post('/questions', (req, res) => {
     }
     questions.push(question);
 
-    const json_response: api.Question = {
+    const jsonResponse: api.Question = {
         ...question,
         created: question.created.toISOString()
     };
-    res.json(json_response);
+    res.json(jsonResponse);
 });
 
 export default router;

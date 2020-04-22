@@ -1,20 +1,25 @@
 import React from 'react';
-import {useState, useEffect} from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 
 import * as api from './api-types';
 
 export default function Question() {
+    const history = useHistory();
     const { id } = useParams();
     const [question, setQuestion] = useState(null as null | api.Question);
 
     useEffect(() => {
-        async function fetch_question() {
+        async function fetchQuestion() {
             const response = await fetch(`/api/questions/${id}`);
+            if (response.status === 404) {
+                history.push('/404');
+                return;
+            }
             const question: api.Question = await response.json();
             setQuestion(question);
         }
-        fetch_question();
+        fetchQuestion();
     }, [id])
 
     let question_details = null;
