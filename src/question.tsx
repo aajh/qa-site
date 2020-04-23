@@ -1,28 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
+import { fetchQuestion } from './slices/questionsSlice';
+import { RootState } from './slices';
 import * as api from './api-types';
 
 export default function Question() {
-    const history = useHistory();
+    const dispatch = useDispatch();
     const { id } = useParams();
-    const [question, setQuestion] = useState(null as null | api.Question);
+    const question: api.Question = useSelector(
+        (state: RootState) => state.questions.questionsById[id]
+    );
 
-    useEffect(() => {
-        async function fetchQuestion() {
-            const response = await fetch(`/api/questions/${id}`);
-            if (response.status === 404) {
-                history.push('/404');
-                return;
-            }
-            const newQuestion: api.Question = await response.json();
-            setQuestion(newQuestion);
-        }
-        fetchQuestion();
-    }, [id]);
+    useEffect(() => { dispatch(fetchQuestion(id)); }, [id, dispatch]);
 
     let questionDetails = null;
-    if (question !== null) {
+    if (question !== undefined) {
         questionDetails = [
             <span key={-1}>{question.created}</span>,
             // eslint-disable-next-line react/no-array-index-key

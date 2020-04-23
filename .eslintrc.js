@@ -19,5 +19,7 @@ module.exports = {
         "jsx-a11y/label-has-associated-control": "off",
         "key-spacing": ["error", { "mode": "minimum" }],
         "@typescript-eslint/space-before-function-paren": "off",
+        "no-param-reassign": "off",
+        "import/no-cycle": "off",
     },
 };
