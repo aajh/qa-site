@@ -55,3 +55,27 @@ export function fetchQuestion(id: string, redirectOn404 = true): AppThunk {
         }
     };
 }
+
+export interface NewQuestion {
+    title: string,
+    author: string,
+    body: string
+}
+export function postNewQuestion(question: NewQuestion, redirect = true): AppThunk {
+    return async dispatch => {
+        const response = await fetch('/api/questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(question)
+        });
+
+        if (response.ok) {
+            const createdQuestion: api.Question = await response.json();
+            dispatch(getQuestionSuccess(createdQuestion));
+
+            if (redirect) {
+                dispatch(push(`/questions/${createdQuestion.id}`));
+            }
+        }
+    };
+}

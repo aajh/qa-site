@@ -1,8 +1,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import * as api from '../api-types';
+import { postNewQuestion } from '../slices/questionsSlice';
 
 type QuestionForm = {
     title: string,
@@ -11,18 +11,11 @@ type QuestionForm = {
 };
 
 export default function Ask() {
-    const history = useHistory();
+    const dispatch = useDispatch();
     const { register, handleSubmit, errors } = useForm<QuestionForm>();
 
-    async function askQuestion(question: QuestionForm) {
-        const response = await fetch('/api/questions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(question)
-        });
-        const createdQuestion: api.Question = await response.json();
-
-        history.push(`/questions/${createdQuestion.id}`);
+    async function onSubmit(question: QuestionForm) {
+        dispatch(postNewQuestion(question));
     }
 
     const fieldRequiredError = <span>This field is required</span>;
@@ -30,7 +23,7 @@ export default function Ask() {
     return (
         <div>
             <h1>Ask a Question</h1>
-            <form onSubmit={handleSubmit(askQuestion)}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <label>
                     Title
                     <input name="title" type="text" ref={register({ required: true })} />
