@@ -27,4 +27,4 @@ ReactDOM.render(
         </Switch>
     </Router>,
     document.getElementById('react-container')
-)
+);

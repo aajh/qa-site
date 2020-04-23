@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
 import * as api from './api-types';
@@ -16,16 +15,17 @@ export default function Question() {
                 history.push('/404');
                 return;
             }
-            const question: api.Question = await response.json();
-            setQuestion(question);
+            const newQuestion: api.Question = await response.json();
+            setQuestion(newQuestion);
         }
         fetchQuestion();
-    }, [id])
+    }, [id]);
 
-    let question_details = null;
+    let questionDetails = null;
     if (question !== null) {
-        question_details = [
+        questionDetails = [
             <span key={-1}>{question.created}</span>,
+            // eslint-disable-next-line react/no-array-index-key
             ...question.body.split('\n\n').map((p, index) => <p key={index}>{p}</p>),
             <span key={-2}>{question.author}</span>,
         ];
@@ -35,7 +35,7 @@ export default function Question() {
         <div>
             <h1>Question</h1>
             <span>{id}</span>
-            {question_details}
+            {questionDetails}
         </div>
-    )
+    );
 }

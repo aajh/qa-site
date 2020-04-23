@@ -1,12 +1,11 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import * as api from './api-types';
 
 type QuestionProps = {
     question: api.QuestionSummary
-}
+};
 
 function Question({ question }: QuestionProps): React.ReactElement {
     return (
@@ -16,7 +15,7 @@ function Question({ question }: QuestionProps): React.ReactElement {
             <span>{question.author}</span>
             <Link to={`/questions/${question.id}`}>Go-to</Link>
         </li>
-    )
+    );
 }
 
 export default function Questions(): React.ReactElement {
@@ -25,8 +24,8 @@ export default function Questions(): React.ReactElement {
     useEffect(() => {
         async function fetchQuestions() {
             const response = await fetch('/api/questions');
-            const questions: api.QuestionSummary[] = await response.json();
-            setQuestions(questions);
+            const newQuestions: api.QuestionSummary[] = await response.json();
+            setQuestions(newQuestions);
         }
         fetchQuestions();
     }, []);

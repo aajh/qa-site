@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form';
 import { useHistory } from 'react-router-dom';
 
 import * as api from './api-types';
@@ -8,7 +8,7 @@ type QuestionForm = {
     title: string,
     author: string,
     body: string
-}
+};
 
 export default function Ask() {
     const history = useHistory();
@@ -17,9 +17,7 @@ export default function Ask() {
     async function askQuestion(question: QuestionForm) {
         const response = await fetch('/api/questions', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(question)
         });
         const createdQuestion: api.Question = await response.json();
@@ -27,7 +25,7 @@ export default function Ask() {
         history.push(`/questions/${createdQuestion.id}`);
     }
 
-    const fieldRequiredError = <span>This field is required</span>
+    const fieldRequiredError = <span>This field is required</span>;
 
     return (
         <div>
@@ -54,5 +52,5 @@ export default function Ask() {
                 <input type="submit" value="Ask" />
             </form>
         </div>
-    )
+    );
 }

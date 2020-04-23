@@ -1,11 +1,12 @@
 const path = require('path');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
     mode: 'production',
     target: 'node',
     devtool: 'source-map',
-    externals: [ nodeExternals() ],
+    externals: [nodeExternals()],
 
     resolve: {
         extensions: ['.ts', '.tsx', '.js']
@@ -34,4 +35,4 @@ module.exports = {
             }
         ]
     }
-}
+};

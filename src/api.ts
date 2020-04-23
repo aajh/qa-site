@@ -6,22 +6,26 @@ import * as api from './api-types';
 const router = express.Router();
 
 interface Question {
-    id:         string
+    id: string
     author: string,
-    title:      string,
-    body:       string,
-    created:    Date
+    title: string,
+    body: string,
+    created: Date
 }
 
-const questions: Question[] = require('../test_data/questions.json').map((q: any) => { return {...q, created: new Date(q.created)}});
+const questions: Question[] = require('../test_data/questions.json').map((q: any) => ({ ...q, created: new Date(q.created) }));
 
 router.get('/questions', (req, res) => {
-    const jsonResponse: api.QuestionSummary[] = questions.map(({ id, author, title, created }) => { return {
-        id, author, title,
-        created: created.toISOString()
-    }});
+    const jsonResponse: api.QuestionSummary[] = questions.map(
+        ({ id, author, title, created }) => ({
+            id,
+            author,
+            title,
+            created: created.toISOString()
+        })
+    );
     res.json(jsonResponse);
-})
+});
 
 router.get('/questions/:id', (req, res) => {
     const question = questions.find(q => q.id === req.params.id);
@@ -34,7 +38,7 @@ router.get('/questions/:id', (req, res) => {
         };
         res.json(jsonResponse);
     }
-})
+});
 
 router.post('/questions', (req, res) => {
     if (req.body === undefined) {
@@ -54,7 +58,7 @@ router.post('/questions', (req, res) => {
         title,
         body,
         created: new Date()
-    }
+    };
     questions.push(question);
 
     const jsonResponse: api.Question = {
