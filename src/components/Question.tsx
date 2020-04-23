@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { fetchQuestion } from './slices/questionsSlice';
-import { RootState } from './slices';
-import * as api from './api-types';
+import { fetchQuestion } from '../slices/questionsSlice';
+import { RootState } from '../slices';
+import * as api from '../api-types';
 
 export default function Question() {
     const dispatch = useDispatch();

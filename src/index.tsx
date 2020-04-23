@@ -10,9 +10,9 @@ import { Provider } from 'react-redux';
 
 import store, { history } from './store';
 
-import Ask from './ask';
-import Question from './question';
-import QuestionList from './questionList';
+import Ask from './components/Ask';
+import Question from './components/Question';
+import QuestionList from './components/QuestionList';
 
 ReactDOM.render(
     <Provider store={store}>

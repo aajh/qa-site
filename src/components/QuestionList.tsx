@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-import { fetchQuestionList } from './slices/questionListSlice';
-import { RootState } from './slices';
-import * as api from './api-types';
+import { fetchQuestionList } from '../slices/questionListSlice';
+import { RootState } from '../slices';
+import * as api from '../api-types';
 
 type QuestionProps = {
     question: api.QuestionSummary

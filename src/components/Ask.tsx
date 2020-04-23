@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useHistory } from 'react-router-dom';
 
-import * as api from './api-types';
+import * as api from '../api-types';
 
 type QuestionForm = {
     title: string,
