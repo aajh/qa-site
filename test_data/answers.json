@@ -1,0 +1,23 @@
+[
+    {
+        "id": "a1",
+        "question": "q1",
+        "author": "Michael",
+        "body": "Just do something else.",
+        "created": "2020-04-21T18:01:00Z"
+    },
+    {
+        "id": "a2",
+        "question": "q1",
+        "author": "John",
+        "body": "Do this instead.",
+        "created": "2020-04-22T10:16:00Z"
+    },
+    {
+        "id": "a3",
+        "question": "q2",
+        "author": "Paul",
+        "body": "You can't do it, kid.",
+        "created": "2020-04-22T10:20:00Z"
+    }
+]

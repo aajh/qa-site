@@ -72,14 +72,56 @@ NewQuestion,
     }
 );
 
+export interface PostNewAnswerArgument {
+    answer: {
+        author: string
+        body: string
+    }
+    questionId: string
+}
+export const postAnswer = createAsyncThunk<
+{
+    answer: api.Answer
+    questionId: string
+},
+PostNewAnswerArgument,
+{
+    rejectValue: string
+}
+>(
+    'questions/postAnswer',
+    async ({ answer, questionId }, { rejectWithValue }) => {
+        try {
+            const response = await fetch(`/api/questions/${questionId}/answers`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(answer)
+            });
+
+            if (response.ok) {
+                const createdAnswer: api.Answer = await response.json();
+                return { answer: createdAnswer, questionId };
+            } else {
+                return rejectWithValue(response.status.toString());
+            }
+        } catch (e) {
+            return rejectWithValue(e.toString());
+        }
+    }
+);
+
 
 interface QuestionsState {
     question: api.Question | null
     loading: boolean
     loadingError: string | null
+
     questionWasPosted: boolean
-    posting: boolean
-    postingError: string | null
+    postingQuestion: boolean
+    postingQuestionError: string | null
+
+    postingAnswer: boolean
+    postingAnswerError: string | null
 }
 
 const questionsInitialState: QuestionsState = {
@@ -87,8 +129,10 @@ const questionsInitialState: QuestionsState = {
     loading: true,
     loadingError: null,
     questionWasPosted: false,
-    posting: false,
-    postingError: null,
+    postingQuestion: false,
+    postingQuestionError: null,
+    postingAnswer: false,
+    postingAnswerError: null
 };
 
 const questions = createSlice({
@@ -126,20 +170,36 @@ const questions = createSlice({
         });
 
         builder.addCase(postQuestion.pending, state => {
-            state.posting = true;
-            state.postingError = null;
+            state.postingQuestion = true;
+            state.postingQuestionError = null;
         });
         builder.addCase(postQuestion.fulfilled, (state, { payload }) => {
             state.question = payload;
             state.loading = false;
             state.loadingError = null;
             state.questionWasPosted = true;
-            state.posting = false;
-            state.postingError = null;
+            state.postingQuestion = false;
+            state.postingQuestionError = null;
         });
         builder.addCase(postQuestion.rejected, (state, { payload }) => {
-            state.posting = false;
-            state.postingError = payload;
+            state.postingQuestion = false;
+            state.postingQuestionError = payload;
+        });
+
+        builder.addCase(postAnswer.pending, state => {
+            state.postingAnswer = true;
+            state.postingAnswerError = null;
+        });
+        builder.addCase(postAnswer.fulfilled, (state, { payload }) => {
+            if (state.question?.id === payload.questionId) {
+                state.question.answers.push(payload.answer);
+            }
+            state.postingAnswer = false;
+            state.postingAnswerError = null;
+        });
+        builder.addCase(postAnswer.rejected, (state, { payload }) => {
+            state.postingAnswer = false;
+            state.postingAnswerError = payload;
         });
     }
 });

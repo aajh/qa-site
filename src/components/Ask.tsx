@@ -13,7 +13,10 @@ type QuestionForm = {
 
 export default function Ask() {
     const dispatch = useDispatch();
-    const { posting, postingError } = useSelector((state: RootState) => state.questions);
+    const {
+        postingQuestion,
+        postingQuestionError
+    } = useSelector((state: RootState) => state.questions);
     const { register, handleSubmit, errors } = useForm<QuestionForm>();
 
     async function onSubmit(question: QuestionForm) {
@@ -44,10 +47,10 @@ export default function Ask() {
                 </label>
                 {errors.body && fieldRequiredError}
 
-                <input type="submit" value="Ask" />
+                <input type="submit" value="Ask" disabled={postingQuestion} />
 
-                { posting && <span>posting...</span>}
-                { postingError !== null && <span>{postingError}</span>}
+                {postingQuestion && <span>posting...</span>}
+                {postingQuestionError !== null && <span>{postingQuestionError}</span>}
             </form>
         </div>
     );
