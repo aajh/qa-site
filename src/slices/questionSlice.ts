@@ -15,7 +15,7 @@ api.Question,
     rejectValue: string
 }
 >(
-    'questions/fetch',
+    'question/fetch',
     async ({ id, redirectOn404 = true }, { dispatch, rejectWithValue }) => {
         try {
             const response = await fetch(`/api/questions/${id}`);
@@ -34,20 +34,19 @@ api.Question,
     }
 );
 
-export interface NewQuestion {
+export const postQuestion = createAsyncThunk<
+api.Question,
+{
     title: string,
     author: string,
     body: string
-}
-export const postQuestion = createAsyncThunk<
-api.Question,
-NewQuestion,
+},
 {
     dispatch: AppDispatch,
     rejectValue: string
 }
 >(
-    'questions/postNew',
+    'question/postNew',
     async (question, { dispatch, rejectWithValue }) => {
         try {
             const response = await fetch('/api/questions', {
@@ -72,24 +71,23 @@ NewQuestion,
     }
 );
 
-export interface PostNewAnswerArgument {
-    answer: {
-        author: string
-        body: string
-    }
-    questionId: string
-}
 export const postAnswer = createAsyncThunk<
 {
     answer: api.Answer
     questionId: string
 },
-PostNewAnswerArgument,
+{
+    answer: {
+        author: string
+        body: string
+    }
+    questionId: string
+},
 {
     rejectValue: string
 }
 >(
-    'questions/postAnswer',
+    'question/postAnswer',
     async ({ answer, questionId }, { rejectWithValue }) => {
         try {
             const response = await fetch(`/api/questions/${questionId}/answers`, {
@@ -111,7 +109,7 @@ PostNewAnswerArgument,
 );
 
 
-interface QuestionsState {
+interface QuestionState {
     question: api.Question | null
     loading: boolean
     loadingError: string | null
@@ -124,7 +122,7 @@ interface QuestionsState {
     postingAnswerError: string | null
 }
 
-const questionsInitialState: QuestionsState = {
+const questionInitialState: QuestionState = {
     question: null,
     loading: true,
     loadingError: null,
@@ -135,9 +133,9 @@ const questionsInitialState: QuestionsState = {
     postingAnswerError: null
 };
 
-const questions = createSlice({
-    name: 'questions',
-    initialState: questionsInitialState,
+const question = createSlice({
+    name: 'question',
+    initialState: questionInitialState,
     reducers: {
         showQuestion(state, { payload }: PayloadAction<string>) {
             if (state.question?.id === payload) {
@@ -207,6 +205,6 @@ const questions = createSlice({
 export const {
     showQuestion,
     leavingQuestion
-} = questions.actions;
+} = question.actions;
 
-export default questions.reducer;
+export default question.reducer;

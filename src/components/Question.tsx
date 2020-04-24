@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 
 import * as api from '../api-types';
-import { fetchQuestion, showQuestion, leavingQuestion, postAnswer } from '../slices/questionsSlice';
+import { fetchQuestion, showQuestion, leavingQuestion, postAnswer } from '../slices/questionSlice';
 import { RootState } from '../slices';
 
 function Answer({ answer }: { answer: api.Answer }) {
@@ -27,7 +27,7 @@ function AnswerForm({ questionId } : { questionId: string }) {
     const {
         postingAnswer,
         postingAnswerError
-    } = useSelector((state: RootState) => state.questions);
+    } = useSelector((state: RootState) => state.question);
 
     async function onSubmit(answer: AnswerForm) {
         await dispatch(postAnswer({ answer, questionId }));
@@ -59,7 +59,7 @@ export default function Question() {
     const dispatch = useDispatch();
     const { id } = useParams();
     const { question, loading, questionWasPosted, loadingError } = useSelector(
-        (state: RootState) => state.questions
+        (state: RootState) => state.question
     );
 
     useEffect(() => {

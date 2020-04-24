@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { postQuestion } from '../slices/questionsSlice';
+import { postQuestion } from '../slices/questionSlice';
 import { RootState } from '../slices';
 
 type QuestionForm = {
@@ -16,7 +16,7 @@ export default function Ask() {
     const {
         postingQuestion,
         postingQuestionError
-    } = useSelector((state: RootState) => state.questions);
+    } = useSelector((state: RootState) => state.question);
     const { register, handleSubmit, errors } = useForm<QuestionForm>();
 
     async function onSubmit(question: QuestionForm) {

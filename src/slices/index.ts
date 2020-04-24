@@ -3,12 +3,12 @@ import { connectRouter } from 'connected-react-router';
 import { History } from 'history';
 
 import questionListReducer from './questionListSlice';
-import questionsReducer from './questionsSlice';
+import questionsReducer from './questionSlice';
 
 const createRootReducer = (history: History) => combineReducers({
     router: connectRouter(history),
     questionList: questionListReducer,
-    questions: questionsReducer
+    question: questionsReducer
 });
 
 export type RootState = ReturnType<ReturnType<typeof createRootReducer>>;
