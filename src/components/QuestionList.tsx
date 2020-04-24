@@ -23,20 +23,24 @@ function Question({ question }: QuestionProps): React.ReactElement {
 
 export default function QuestionList(): React.ReactElement {
     const dispatch = useDispatch();
-    const questionList = useSelector((state: RootState) => state.questionList.questionList);
+    const { questionList, loading, error } = useSelector((state: RootState) => state.questionList);
 
     useEffect(() => {
         if (questionList.length === 0) {
             dispatch(fetchQuestionList());
         }
-    }, [dispatch]);
+    }, []);
+
+    const questionListElement = questionList.length > 0
+        ? <ul>{questionList.map(q => <Question key={q.id} question={q} />)}</ul>
+        : null;
 
     return (
         <div>
             <h1>QA</h1>
-            <ul>
-                {questionList.map(q => <Question key={q.id} question={q} />)}
-            </ul>
+            {questionListElement}
+            { loading && <span>loading...</span>}
+            { error !== null && <span>{error}</span>}
         </div>
     );
 }
