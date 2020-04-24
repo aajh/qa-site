@@ -1,8 +1,9 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { postNewQuestion } from '../slices/questionsSlice';
+import { postQuestion } from '../slices/questionsSlice';
+import { RootState } from '../slices';
 
 type QuestionForm = {
     title: string,
@@ -12,10 +13,11 @@ type QuestionForm = {
 
 export default function Ask() {
     const dispatch = useDispatch();
+    const { posting, postingError } = useSelector((state: RootState) => state.questions);
     const { register, handleSubmit, errors } = useForm<QuestionForm>();
 
     async function onSubmit(question: QuestionForm) {
-        dispatch(postNewQuestion(question));
+        dispatch(postQuestion(question));
     }
 
     const fieldRequiredError = <span>This field is required</span>;
@@ -43,6 +45,9 @@ export default function Ask() {
                 {errors.body && fieldRequiredError}
 
                 <input type="submit" value="Ask" />
+
+                { posting && <span>posting...</span>}
+                { postingError !== null && <span>{postingError}</span>}
             </form>
         </div>
     );

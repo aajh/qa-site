@@ -47,7 +47,7 @@ router.post('/questions', (req, res) => {
     }
 
     const { author, title, body } = req.body;
-    if (author === undefined || title === undefined || body === undefined) {
+    if (!author || !title || !body) {
         res.status(400).end();
         return;
     }

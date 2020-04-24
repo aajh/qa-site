@@ -25,7 +25,11 @@ export default function QuestionList(): React.ReactElement {
     const dispatch = useDispatch();
     const questionList = useSelector((state: RootState) => state.questionList.questionList);
 
-    useEffect(() => { dispatch(fetchQuestionList()); }, [dispatch]);
+    useEffect(() => {
+        if (questionList.length === 0) {
+            dispatch(fetchQuestionList());
+        }
+    }, [dispatch]);
 
     return (
         <div>

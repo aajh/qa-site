@@ -11,7 +11,7 @@
     "build-dev": "npm run clean && webpack --mode development --config webpack.server.config.js",
     "start": "node -r source-map-support/register .",
     "start-dev": "npm-run-all build-dev start",
-    "watch": "nodemon --watch src -e ts,tsx,js --exec npm-run-all build-dev start",
+    "watch": "nodemon --watch src -e ts,tsx,js --exec npm run start-dev",
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"

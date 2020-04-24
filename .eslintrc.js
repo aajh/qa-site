@@ -21,5 +21,7 @@ module.exports = {
         "@typescript-eslint/space-before-function-paren": "off",
         "no-param-reassign": "off",
         "import/no-cycle": "off",
+        "no-else-return": "off",
+        "@typescript-eslint/no-use-before-define": "off",
     },
 };
