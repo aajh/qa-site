@@ -9,7 +9,8 @@ export const history = createBrowserHistory();
 
 const store = configureStore({
     reducer: createRootReducer(history),
-    middleware: [...getDefaultMiddleware(), routerMiddleware(history)]
+    middleware: [...getDefaultMiddleware(), routerMiddleware(history)] as const,
+    devTools: process.env.NODE_ENV !== 'production',
 });
 
 export type AppDispatch = typeof store.dispatch;

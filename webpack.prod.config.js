@@ -1,23 +1,18 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const path = require('path');
-const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    mode: 'development',
+    mode: 'production',
     target: 'web',
-    devtool: 'source-map',
-
-    devServer: {
-        contentBase: './dist',
-    },
 
     resolve: {
         extensions: ['.ts', '.tsx', '.js']
     },
-    entry: ['./src/index.tsx', 'webpack-hot-middleware/client?reload=true'],
+    entry: './src/index.tsx',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist', 'static'),
         publicPath: '/',
     },
 
@@ -44,8 +39,6 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: 'index.html',
             hash: true,
-        }),
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoEmitOnErrorsPlugin(),
+        })
     ]
 };

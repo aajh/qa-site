@@ -1,11 +1,8 @@
+/* eslint-disable global-require */
 /* eslint-disable import/no-extraneous-dependencies */
 import express from 'express';
 import dotenv from 'dotenv';
 import connectHistoryApiFallback from 'connect-history-api-fallback';
-
-import webpack from 'webpack';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-import webpackHotMiddleware from 'webpack-hot-middleware';
 
 import api from './api';
 
@@ -17,15 +14,21 @@ app.use('/api', api);
 
 app.use(connectHistoryApiFallback());
 
-// Webpack dev and hot reload configuration
-const webpackConfig = require('../webpack.config.js');
+if (process.env.NODE_ENV !== 'production') {
+    const webpack = require('webpack');
+    const webpackDevMiddleware = require('webpack-dev-middleware');
+    const webpackHotMiddleware = require('webpack-hot-middleware');
+    const webpackConfig = require('../webpack.dev.config.js');
 
-const compiler = webpack(webpackConfig);
-app.use(webpackDevMiddleware(compiler, { publicPath: webpackConfig.output.publicPath }));
-app.use(webpackHotMiddleware(compiler));
+    const compiler = webpack(webpackConfig);
+    app.use(webpackDevMiddleware(compiler, { publicPath: webpackConfig.output.publicPath }));
+    app.use(webpackHotMiddleware(compiler));
+}
+
+app.use(express.static('dist/static'));
 
 const port = process.env.PORT ?? 8080;
 app.listen(port, () => {
     // eslint-disable-next-line no-console
-    console.log(`server started at http://localhost:${port}`);
+    console.log(`server started at http://localhost:${port} in ${process.env.NODE_ENV} mode`);
 });
