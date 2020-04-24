@@ -8,6 +8,8 @@ import {
 import { ConnectedRouter } from 'connected-react-router';
 import { Provider } from 'react-redux';
 
+import '../node_modules/normalize.css/normalize.css';
+
 import store, { history } from './store';
 
 import Ask from './components/Ask';
