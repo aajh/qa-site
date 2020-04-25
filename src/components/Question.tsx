@@ -2,17 +2,25 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import classNames from 'classnames';
 
 import * as api from '../api-types';
 import { fetchQuestion, showQuestion, leavingQuestion, postAnswer } from '../slices/questionSlice';
 import { RootState } from '../slices';
 
 function Answer({ answer }: { answer: api.Answer }) {
+    const created = new Date(answer.created).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+    });
+
     return (
-        <li>
+        <li className="list-group-item">
             <p>{answer.body}</p>
-            <span>{answer.author}</span>
-            <span>{answer.created}</span>
+            <small style={{ float: 'right' }}>{`answered ${created} by ${answer.author}`}</small>
         </li>
     );
 }
@@ -34,21 +42,45 @@ function AnswerForm({ questionId } : { questionId: string }) {
         reset();
     }
 
-    const fieldRequiredError = <span>This field is required</span>;
-
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <label>Name</label>
-            <input name="author" type="text" ref={register({ required: true })} />
-            {errors.author && fieldRequiredError}
+            <div className="form-group">
+                <h4>Your Answer</h4>
+            </div>
+            <div className="form-group">
+                <label htmlFor="author">Name</label>
+                <input
+                    name="author"
+                    id="author"
+                    type="text"
+                    ref={register({ required: true })}
+                    className={classNames('form-control', { 'is-invalid': errors.author })}
+                />
+                {errors.author && <div className="invalid-feedback">Name is required.</div>}
+            </div>
 
-            <label>Body</label>
-            <textarea name="body" ref={register({ required: true })} />
-            {errors.body && fieldRequiredError}
+            <div className="form-group">
+                <label htmlFor="body">Body</label>
+                <textarea
+                    name="body"
+                    id="body"
+                    ref={register({ required: true })}
+                    className={classNames('form-control', { 'is-invalid': errors.body })}
+                />
+                {errors.body && <div className="invalid-feedback">Body is required.</div>}
+            </div>
 
-            <input type="submit" value="Answer" disabled={postingAnswer} />
+            <div className="form-group">
+                <button type="submit" disabled={postingAnswer} className="btn btn-primary">
+                    {postingAnswer
+                        ? [
+                            <span key={0} className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />,
+                            'Submitting Answer'
+                        ]
+                        : 'Submit Answer'}
+                </button>
+            </div>
 
-            {postingAnswer && <span>posting...</span>}
             {postingAnswerError !== null && <span>{postingAnswerError}</span>}
 
         </form>
@@ -74,28 +106,62 @@ export default function Question() {
 
     let questionDetails = null;
     if (!loading && question !== null) {
+        const created = new Date(question.created).toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+        });
+
         questionDetails = (
             <div>
-                <h1 key={-1}>{question.title}</h1>
-                <span key={-2}>{question.created}</span>
-                {
-                    // eslint-disable-next-line react/no-array-index-key
-                    question.body.split('\n\n').map((p, index) => <p key={index}>{p}</p>)
-                }
-                <span key={-3}>{question.author}</span>
+                <div className="row">
+                    <div className="col">
+                        <h2>{question.title}</h2>
+                    </div>
+                </div>
+                <div className="row pt-3">
+                    <div className="col">
+                        {
+                            // eslint-disable-next-line react/no-array-index-key
+                            question.body.split('\n\n').map((p, index) => <p key={index}>{p}</p>)
+                        }
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col">
+                        <small style={{ float: 'right' }}>{`asked ${created} by ${question.author}`}</small>
+                    </div>
+                </div>
                 {question.answers.length > 0 && (
-                    <ul>
-                        {question.answers.map(a => <Answer key={a.id} answer={a} />)}
-                    </ul>
+                    <div className="row pt-5">
+                        <div className="col">
+                            <h4>{`${question.answers.length} answer${question.answers.length > 1 ? 's' : ''}`}</h4>
+                            <ul className="list-group list-group-flush">
+                                {question.answers.map(a => <Answer key={a.id} answer={a} />)}
+                            </ul>
+                        </div>
+                    </div>
                 )}
-                <AnswerForm questionId={id} />
+                <div className="row justify-content-center">
+                    <div className="col-md-8">
+                        <AnswerForm questionId={id} />
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div>
-            {loading && <span>Loading...</span>}
+        <div className="container pt-5">
+            {loading && (
+                <div className="d-flex justify-content-center">
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="sr-only">Loading...</span>
+                    </div>
+                </div>
+            )}
             {loadingError !== null && <span>{loadingError}</span>}
             {questionDetails}
         </div>

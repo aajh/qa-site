@@ -7,7 +7,9 @@ import {
 import { ConnectedRouter } from 'connected-react-router';
 import { Provider } from 'react-redux';
 
-import '../node_modules/normalize.css/normalize.css';
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.css';
+import './main.css';
 
 import store, { history } from './store';
 

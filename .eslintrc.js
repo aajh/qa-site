@@ -23,5 +23,6 @@ module.exports = {
         "import/no-cycle": "off",
         "no-else-return": "off",
         "@typescript-eslint/no-use-before-define": "off",
+        "react/jsx-indent-props": ["error", 4],
     },
 };

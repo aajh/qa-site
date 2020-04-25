@@ -11,12 +11,19 @@ type QuestionProps = {
 };
 
 function Question({ question }: QuestionProps): React.ReactElement {
+    const created = new Date(question.created).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+    });
     return (
-        <li>
-            <h2>{question.title}</h2>
-            <span>{question.created}</span>
-            <span>{question.author}</span>
-            <Link to={`/questions/${question.id}`}>Go-to</Link>
+        <li className="list-group-item">
+            <h4>
+                <Link to={`/questions/${question.id}`}>{question.title}</Link>
+            </h4>
+            <small style={{ float: 'right' }}>{`asked ${created} by ${question.author}`}</small>
         </li>
     );
 }
@@ -31,16 +38,26 @@ export default function QuestionList(): React.ReactElement {
         }
     }, []);
 
-    const questionListElement = questionList.length > 0
-        ? <ul>{questionList.map(q => <Question key={q.id} question={q} />)}</ul>
+    const questionListElement = !loading && questionList.length > 0
+        ? <ul className="list-group">{questionList.map(q => <Question key={q.id} question={q} />)}</ul>
         : null;
 
     return (
-        <div>
-            <h1>QA</h1>
-            {questionListElement}
-            { loading && <span>loading...</span>}
-            { error !== null && <span>{error}</span>}
+        <div className="container pt-5">
+            <div className="row justify-content-center">
+                <div className="col-md-10">
+                    <h1 className="pb-1">Questions</h1>
+                    {questionListElement}
+                    {loading && (
+                        <div className="d-flex justify-content-center">
+                            <div className="spinner-border text-secondary" role="status">
+                                <span className="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    )}
+                    {error !== null && <span>{error}</span>}
+                </div>
+            </div>
         </div>
     );
 }
