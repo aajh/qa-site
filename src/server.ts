@@ -1,12 +1,14 @@
+/* eslint-disable import/first */
 /* eslint-disable global-require */
 /* eslint-disable import/no-extraneous-dependencies */
 import express from 'express';
 import dotenv from 'dotenv';
 import connectHistoryApiFallback from 'connect-history-api-fallback';
 
+dotenv.config();
+
 import api from './api';
 
-dotenv.config();
 const app = express();
 
 app.use(express.json());
@@ -26,6 +28,15 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 app.use(express.static('dist/static'));
+app.use((err: any, req: any, res: any, next: any) => {
+    // eslint-disable-next-line no-console
+    console.error(err);
+    if (res.headersSent) {
+        next(err);
+        return;
+    }
+    res.status(err.status);
+});
 
 const port = process.env.PORT ?? 8080;
 app.listen(port, () => {

@@ -1,0 +1,3 @@
+BEGIN;
+    TRUNCATE questions CASCADE;
+COMMIT;
