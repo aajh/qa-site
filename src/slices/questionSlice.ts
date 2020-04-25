@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { push, replace } from 'connected-react-router';
 
 import { AppDispatch } from '../store';
-import * as api from '../api-types';
+import * as api from '../api/types';
 
 export const fetchQuestion = createAsyncThunk<
 api.Question,

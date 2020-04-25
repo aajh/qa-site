@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import * as api from '../api-types';
+import * as api from '../api/types';
 
 export const fetchQuestionList = createAsyncThunk<
 api.QuestionSummary[],

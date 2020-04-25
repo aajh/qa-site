@@ -1,7 +1,7 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as api from './api-types';
+import * as api from './types';
 
 const router = express.Router();
 
@@ -21,10 +21,10 @@ interface Answer {
     created: Date
 }
 
-const questions: Question[] = require('../test_data/questions.json').map((q: any) => ({ ...q, created: new Date(q.created) }));
-const answers: Answer[] = require('../test_data/answers.json').map((a: any) => ({ ...a, created: new Date(a.created) }));
+const questions: Question[] = require('../../test_data/questions.json').map((q: any) => ({ ...q, created: new Date(q.created) }));
+const answers: Answer[] = require('../../test_data/answers.json').map((a: any) => ({ ...a, created: new Date(a.created) }));
 
-router.get('/questions', (req, res) => {
+router.get('/', (req, res) => {
     const jsonResponse: api.QuestionSummary[] = questions.map(
         ({ id, author, title, created }) => ({
             id,
@@ -36,7 +36,7 @@ router.get('/questions', (req, res) => {
     res.json(jsonResponse);
 });
 
-router.get('/questions/:id', (req, res) => {
+router.get('/:id', (req, res) => {
     const question = questions.find(q => q.id === req.params.id);
     if (question === undefined) {
         res.status(404).end();
@@ -55,7 +55,7 @@ router.get('/questions/:id', (req, res) => {
     }
 });
 
-router.post('/questions', (req, res) => {
+router.post('/', (req, res) => {
     if (req.body === undefined) {
         res.status(400).end();
         return;
@@ -84,7 +84,7 @@ router.post('/questions', (req, res) => {
     res.json(jsonResponse);
 });
 
-router.post('/questions/:id/answers', (req, res) => {
+router.post('/:id/answers', (req, res) => {
     const question = questions.find(q => q.id === req.params.id);
     if (question === undefined) {
         res.status(404).end();

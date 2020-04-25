@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import classNames from 'classnames';
 import ReactMarkdown from 'react-markdown';
 
-import * as api from '../api-types';
+import * as api from '../api/types';
 import { fetchQuestion, showQuestion, leavingQuestion, postAnswer } from '../slices/questionSlice';
 import { RootState } from '../slices';
 
