@@ -10,7 +10,7 @@ type QuestionProps = {
     question: api.QuestionSummary
 };
 
-function Question({ question }: QuestionProps): React.ReactElement {
+function QuestionItem({ question }: QuestionProps): React.ReactElement {
     const created = new Date(question.created).toLocaleString(undefined, {
         year: 'numeric',
         month: 'short',
@@ -39,7 +39,7 @@ export default function QuestionList(): React.ReactElement {
     }, []);
 
     const questionListElement = !loading && questionList.length > 0
-        ? <ul className="list-group">{questionList.map(q => <Question key={q.id} question={q} />)}</ul>
+        ? <ul className="list-group">{questionList.map(q => <QuestionItem key={q.id} question={q} />)}</ul>
         : null;
 
     return (

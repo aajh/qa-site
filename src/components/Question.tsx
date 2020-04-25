@@ -9,7 +9,7 @@ import * as api from '../api/types';
 import { fetchQuestion, showQuestion, leavingQuestion, postAnswer } from '../slices/questionSlice';
 import { RootState } from '../slices';
 
-function Answer({ answer }: { answer: api.Answer }) {
+function AnswerItem({ answer }: { answer: api.Answer }) {
     const created = new Date(answer.created).toLocaleString(undefined, {
         year: 'numeric',
         month: 'short',
@@ -145,7 +145,7 @@ export default function Question() {
                         <div className="col">
                             <h4>{`${question.answers.length} answer${question.answers.length > 1 ? 's' : ''}`}</h4>
                             <ul className="list-group list-group-flush">
-                                {question.answers.map(a => <Answer key={a.id} answer={a} />)}
+                                {question.answers.map(a => <AnswerItem key={a.id} answer={a} />)}
                             </ul>
                         </div>
                     </div>
