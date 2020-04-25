@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import classNames from 'classnames';
+import ReactMarkdown from 'react-markdown';
 
 import * as api from '../api-types';
 import { fetchQuestion, showQuestion, leavingQuestion, postAnswer } from '../slices/questionSlice';
@@ -19,7 +20,7 @@ function Answer({ answer }: { answer: api.Answer }) {
 
     return (
         <li className="list-group-item">
-            <p>{answer.body}</p>
+            <ReactMarkdown source={answer.body} />
             <small style={{ float: 'right' }}>{`answered ${created} by ${answer.author}`}</small>
         </li>
     );
@@ -31,11 +32,13 @@ type AnswerForm = {
 };
 function AnswerForm({ questionId } : { questionId: string }) {
     const dispatch = useDispatch();
-    const { register, handleSubmit, errors, reset } = useForm<AnswerForm>();
+    const { register, handleSubmit, errors, reset, watch } = useForm<AnswerForm>();
     const {
         postingAnswer,
         postingAnswerError
     } = useSelector((state: RootState) => state.question);
+
+    const body = watch('body');
 
     async function onSubmit(answer: AnswerForm) {
         await dispatch(postAnswer({ answer, questionId }));
@@ -80,9 +83,15 @@ function AnswerForm({ questionId } : { questionId: string }) {
                         : 'Submit Answer'}
                 </button>
             </div>
-
             {postingAnswerError !== null && <span>{postingAnswerError}</span>}
 
+            {body && (
+                <div>
+                    <h3 className="pt-3">Answer Preview</h3>
+                    <hr />
+                    <ReactMarkdown source={body} />
+                </div>
+            )}
         </form>
     );
 }
@@ -123,10 +132,7 @@ export default function Question() {
                 </div>
                 <div className="row pt-3">
                     <div className="col">
-                        {
-                            // eslint-disable-next-line react/no-array-index-key
-                            question.body.split('\n\n').map((p, index) => <p key={index}>{p}</p>)
-                        }
+                        <ReactMarkdown source={question.body} />
                     </div>
                 </div>
                 <div className="row">
@@ -144,7 +150,7 @@ export default function Question() {
                         </div>
                     </div>
                 )}
-                <div className="row justify-content-center">
+                <div className="row justify-content-center pb-5">
                     <div className="col-md-8">
                         <AnswerForm questionId={id} />
                     </div>

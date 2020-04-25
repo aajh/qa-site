@@ -1,23 +1,23 @@
 [
     {
-        "id": "q1",
+        "id": "9eae28b9-a77b-4f39-901d-140e2d4a710c",
         "author": "Kevin.a",
         "title": "favicon.ico 500 error when fetching robots.txt",
         "body": "I have an error 500 on my example.com/robots.txt page.\n\nCould this cause any SEO / crawling issues? It's just the favicon , but you never know.",
         "created": "2020-04-21T16:00:00Z"
     },
     {
-        "id": "q2",
+        "id": "13ebf57d-4d1d-49db-aa38-301767778c81",
         "author": "Mike D",
         "title": "Vue recognize text pattern and replace by href to correct resource",
         "body": "I'm working on a project where I keep a log of key actions by users. For example a log entry is made when a user logs in to the application. I use a Laravel API as backend that takes care of the logging the event in the database and takes care of retrieving log entries to be displayed in the application. An example of a log entry returned for display is the following:\n\n{{user|123|\"John Doe\"}} logged in at 2020-01-03 11:00:05\n\nNow, I'd like Vue to automatically recognize that this should be replaced by the following:\n\n<router-link to=\"/user/123\">John Doe</router-link> logged in at 2020-01-03 11:00:05\n\nSo it automatically becomes a clickable link that navigates to the user profile in this case.\n\nDoes Vue offer any such functionality? Any ideas on how to approach this?\n\nThanks!",
         "created": "2020-04-05T21:16:00Z"
     },
     {
-        "id": "q3",
+        "id": "96a2bec4-0c46-4d86-bce7-72dfee38e3b1",
         "author": "donto",
         "title": "Sample the neighbour value from a list",
-        "body": "Let say, I have a list:\n\n[Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec]\n\nand I randomly choose the index (let say idx=4, thus \"May\"), I want my function to return\n\n[Mar,Apr,May,Jun,Jul]\n\nIf the index is 0 (Jan) or 1 (Feb) then I want my function to return [Jan,Feb,Mar,Apr,May]. The length of returned list is always 5.\n\nHow to create such function in Python3?\n\nSimple question but why my head starts to explode?\n\nThanks.",
+        "body": "Let say, I have a list:\n\n\\[Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec\\]\n\nand I randomly choose the index (let say idx=4, thus \"May\"), I want my function to return\n\n\\[Mar,Apr,May,Jun,Jul\\]\n\nIf the index is 0 (Jan) or 1 (Feb) then I want my function to return \\[Jan,Feb,Mar,Apr,May\\]. The length of returned list is always 5.\n\nHow to create such function in Python3?\n\nSimple question but why my head starts to explode?\n\nThanks.",
         "created": "2020-04-22T10:30:00Z"
     }
 ]

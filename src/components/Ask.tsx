@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import classNames from 'classnames';
+import ReactMarkdown from 'react-markdown';
 
 import { postQuestion } from '../slices/questionSlice';
 import { RootState } from '../slices';
@@ -18,14 +19,16 @@ export default function Ask() {
         postingQuestion,
         postingQuestionError
     } = useSelector((state: RootState) => state.question);
-    const { register, handleSubmit, errors } = useForm<QuestionForm>();
+    const { register, handleSubmit, errors, watch } = useForm<QuestionForm>();
+
+    const body = watch('body');
 
     async function onSubmit(question: QuestionForm) {
         dispatch(postQuestion(question));
     }
 
     return (
-        <div className="container pt-5">
+        <div className="container py-5">
             <div className="row justify-content-center">
                 <div className="col-md-8">
                     <h1>Ask a Question</h1>
@@ -78,6 +81,13 @@ export default function Ask() {
 
                         {postingQuestionError !== null && <span>{postingQuestionError}</span>}
                     </form>
+                    {body && (
+                        <div>
+                            <h3 className="pt-3">Question Preview</h3>
+                            <hr />
+                            <ReactMarkdown source={body} />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
