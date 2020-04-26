@@ -1,50 +1,54 @@
 import express from 'express';
-import pg from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as api from './types';
+import pool from './pool';
 
 const router = express.Router();
-
-const connectionVariables: Record<string, string> = {
-    development: 'DEV_DATABASE_URL',
-    test: 'TEST_DATABASE_URL',
-    production: 'DATABASE_URL'
-};
-const pool = new pg.Pool({
-    connectionString: process.env[connectionVariables[process.env.NODE_ENV]]
-});
 
 router.get('/', async (req, res) => {
     try {
         const { rows: jsonResponse } = await pool.query<api.QuestionSummary>(
-            'SELECT id, author, title, created FROM questions'
+            `SELECT questions.id, username as author, title, created
+            FROM questions
+            INNER JOIN users ON users.id=questions.authorId`
         );
         res.json(jsonResponse);
     } catch (error) {
-        res.status(500).json({ error });
+        console.error(error);
+        res.status(500).end();
     }
 });
 
 router.get('/:id', async (req, res) => {
     const client = await pool.connect();
     try {
-        const questionResult = await client.query('SELECT * FROM questions WHERE id = $1', [req.params.id]);
+        const questionResult = await client.query(
+            `SELECT questions.id, username as author, title, body, created
+            FROM questions
+            INNER JOIN users ON users.id=questions.authorId
+            WHERE questions.id = $1`,
+            [req.params.id]
+        );
         if (questionResult.rowCount === 0) {
             res.status(404).end();
         } else {
-            const questionAnswers = await client.query(
-                'SELECT id, author, body, created FROM answers WHERE questionId = $1',
+            const { rows: questionAnswers } = await client.query(
+                `SELECT answers.id, users.username as author, body, created
+                FROM answers
+                INNER JOIN users on users.id=answers.authorId
+                WHERE questionId = $1`,
                 [req.params.id]
             );
             const jsonResponse: api.Question = {
                 ...questionResult.rows[0],
-                answers: questionAnswers.rows
+                answers: questionAnswers
             };
             res.json(jsonResponse);
         }
     } catch (error) {
-        res.status(500).json({ error });
+        console.error(error);
+        res.status(500).end();
     } finally {
         client.release();
     }
@@ -59,8 +63,8 @@ router.post('/', async (req, res) => {
 
         const { author, title, body } = req.body;
         const isInvalid = !author || !title || !body
-            || typeof author !== 'string' || author.length >= 128
-            || typeof title !== 'string' || author.length >= 512
+            || typeof author !== 'string' || author.length > 128
+            || typeof title !== 'string' || author.length > 512
             || typeof body !== 'string';
         if (isInvalid) {
             res.status(400).end();
@@ -78,7 +82,8 @@ router.post('/', async (req, res) => {
         };
         res.json(jsonResponse);
     } catch (error) {
-        res.status(500).json({ error });
+        console.error(error);
+        res.status(500).end();
     }
 });
 
@@ -101,7 +106,7 @@ router.post('/:id/answers', async (req, res) => {
 
         const { author, body } = req.body;
         const isInvalid = !author || !body
-            || typeof author !== 'string' || author.length >= 128
+            || typeof author !== 'string' || author.length > 128
             || typeof body !== 'string';
         if (isInvalid) {
             res.status(400).end();
@@ -119,7 +124,8 @@ router.post('/:id/answers', async (req, res) => {
         }))(answer);
         res.json(jsonResponse);
     } catch (error) {
-        res.status(500).json({ error });
+        console.error(error);
+        res.status(500).end();
     } finally {
         client.release();
     }

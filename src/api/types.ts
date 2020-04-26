@@ -1,3 +1,12 @@
+export interface User {
+    username: string
+}
+
+export interface JWTPayload {
+    id: string,
+    username: string
+}
+
 export interface Answer {
     id: string
     author: string
