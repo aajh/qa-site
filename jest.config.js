@@ -1,6 +1,9 @@
 module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
-    globalSetup: './test/global.setup.js',
-    globalTeardown: './test/global.teardown.js',
+    preset: 'jest-puppeteer',
+    globalSetup: './global-setup.js',
+    globalTeardown: './global-teardown.js',
+    rootDir: 'test',
+    transform: {
+        '^.+\\.ts$': 'ts-jest',
+    },
 };
