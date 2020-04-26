@@ -21,7 +21,7 @@ test('GET /questions/:id', async () => {
     expect(question).toMatchSnapshot();
 });
 
-test('POST /questions', async() => {
+test('POST /questions', async () => {
     const question = {
         title: 'Test',
         author: 'Test author',
@@ -40,4 +40,23 @@ test('POST /questions', async() => {
     expect(createdQuestion.id).toBeDefined();
     expect(createdQuestion.created).toBeDefined();
     expect(createdQuestion.answers).toEqual([]);
+});
+
+test('POST /questions/:id/answers', async () => {
+    const answer = {
+        title: 'Test',
+        author: 'Test author',
+        body: 'Test body',
+    };
+    const response = await fetch(`${SERVER_URL}/api/questions/9eae28b9-a77b-4f39-901d-140e2d4a710c/answers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(answer)
+    });
+    expect(response.ok).toBe(true);
+    const createdAnswer: api.Answer = await response.json();
+    expect(createdAnswer.author).toBe(answer.author);
+    expect(createdAnswer.body).toBe(answer.body);
+    expect(createdAnswer.id).toBeDefined();
+    expect(createdAnswer.created).toBeDefined();
 });
