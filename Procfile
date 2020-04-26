@@ -1,1 +1,1 @@
-web: node -r source-map-support/register dist/server.js
+web: node -r source-map-support/register dist/src/server.js
