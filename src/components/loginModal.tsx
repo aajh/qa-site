@@ -1,44 +1,35 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { login } from '../slices/userSlice';
+import { login, closeLoginModal } from '../slices/userSlice';
 import { RootState } from '../slices';
-
-interface LoginModalProps {
-    show: boolean
-    onClose: () => void
-}
 
 interface LoginForm {
     username: string
     password: string
 }
 
-export default function LoginModal({ show, onClose }: LoginModalProps) {
+export default function LoginModal() {
     const dispatch = useDispatch();
     const {
-        user,
+        showLoginModal,
         loggingIn,
         wrongPasswordOrUsername,
         loginError
     } = useSelector((state: RootState) => state.user);
     const { register, handleSubmit, errors } = useForm<LoginForm>();
 
-    // Close the modal when the user logs in.
-    useEffect(() => {
-        if (user !== null) {
-            onClose();
-        }
-    }, [user]);
-
-    async function onSubmit(loginInformation: LoginForm) {
+    function onSubmit(loginInformation: LoginForm) {
         dispatch(login(loginInformation));
+    }
+    function onHide() {
+        dispatch(closeLoginModal());
     }
 
     return (
-        <Modal show={show} onHide={onClose}>
+        <Modal show={showLoginModal} onHide={onHide}>
             <Modal.Header closeButton>
                 <Modal.Title>Login</Modal.Title>
             </Modal.Header>
@@ -74,7 +65,7 @@ export default function LoginModal({ show, onClose }: LoginModalProps) {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onClose}>
+                <Button variant="secondary" onClick={onHide}>
                     Cancel
                 </Button>
                 <Button variant="primary" type="submit" form="login-form" disabled={loggingIn}>

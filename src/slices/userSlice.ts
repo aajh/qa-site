@@ -38,6 +38,7 @@ export interface UserState {
     token: string | null
     user: api.JWTPayload | null
 
+    showLoginModal: boolean
     loggingIn: boolean
     loginError: boolean
     wrongPasswordOrUsername: boolean
@@ -46,6 +47,7 @@ export interface UserState {
 export const userInitialState: UserState = {
     token: null,
     user: null,
+    showLoginModal: false,
     loggingIn: false,
     loginError: false,
     wrongPasswordOrUsername: false,
@@ -57,7 +59,18 @@ const user = createSlice({
     reducers: {
         logout() {
             return userInitialState;
-        }
+        },
+        showLoginModal(state) {
+            return {
+                ...state,
+                showLoginModal: true,
+                loginError: false,
+                wrongPasswordOrUsername: false,
+            };
+        },
+        closeLoginModal(state) {
+            state.showLoginModal = false;
+        },
     },
     extraReducers: builder => {
         builder.addCase(login.pending, state => {
@@ -68,6 +81,7 @@ const user = createSlice({
         builder.addCase(login.fulfilled, (_, { payload: token }) => ({
             token,
             user: jwt.decode(token) as api.JWTPayload,
+            showLoginModal: false,
             loggingIn: false,
             loginError: false,
             wrongPasswordOrUsername: false,
@@ -81,7 +95,9 @@ const user = createSlice({
 });
 
 export const {
-    logout
+    logout,
+    showLoginModal,
+    closeLoginModal,
 } = user.actions;
 
 export default user.reducer;

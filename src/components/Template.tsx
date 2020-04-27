@@ -1,34 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Container, Navbar, Nav } from 'react-bootstrap';
 
 import { RootState } from '../slices';
-import { logout } from '../slices/userSlice';
+import { logout, showLoginModal } from '../slices/userSlice';
 import { fetchQuestionList } from '../slices/questionListSlice';
 import LoginModal from './LoginModal';
 
 export default function Template({ children }: { children: React.ReactNode }) {
     const dispatch = useDispatch();
-    const { questionList } = useSelector((state: RootState) => state.questionList);
+    const {
+        questionList,
+        loading: loadingQuestionList
+    } = useSelector((state: RootState) => state.questionList);
     const { user } = useSelector((state: RootState) => state.user);
-    const [showLoginModal, setShowLoginModal] = useState(false);
 
     const loggedIn = user !== null;
 
     function onHomeClick() {
-        if (questionList.length !== 0) {
+        // If questionList.length === 0, QuestionList initiates loading.
+        if (!loadingQuestionList && questionList.length !== 0) {
             dispatch(fetchQuestionList());
         }
     }
 
-    function onCloseLoginModal() {
-        setShowLoginModal(false);
-    }
     function onShowLoginModal() {
-        setShowLoginModal(true);
+        dispatch(showLoginModal());
     }
-
     function onLogout() {
         dispatch(logout());
     }
@@ -55,7 +54,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
                 </Container>
             </Navbar>
             {children}
-            <LoginModal show={showLoginModal} onClose={onCloseLoginModal} />
+            <LoginModal />
         </div>
     );
 }
