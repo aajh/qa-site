@@ -2,7 +2,7 @@ import Router from 'express-promise-router';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as api from './types';
-import pool from './pool';
+import { pool, getDecodedToken } from './common';
 
 const router = Router();
 
@@ -47,31 +47,48 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    if (req.body === undefined) {
-        res.status(400).end({ error: 'invalid request' });
-        return;
+    const client = await pool.connect();
+    try {
+        if (req.body === undefined) {
+            res.status(400).end({ error: 'invalid request' });
+            return;
+        }
+
+        const { title, body } = req.body;
+        const isInvalid = !title || !body
+            || typeof title !== 'string' || title.length > 512
+            || typeof body !== 'string' || body.length === 0;
+        if (isInvalid) {
+            res.status(400).end({ error: 'invalid request' });
+            return;
+        }
+
+        const token = getDecodedToken(req, res);
+        if (token === null) {
+            return;
+        }
+
+        const { rows } = await client.query(
+            `INSERT INTO questions(id, authorId, title, body, created)
+            VALUES ($1, $2, $3, $4, NOW())
+            RETURNING id, title, body, created`,
+            [uuidv4(), token.id, title, body]
+        );
+
+        const { rows: [{ username }] } = await client.query(
+            'SELECT username FROM users WHERE id = $1',
+            [token.id]
+        );
+
+        const jsonResponse: api.Question = {
+            ...rows[0],
+            author: username,
+            answers: []
+        };
+        res.json(jsonResponse);
+    } finally {
+        client.release();
     }
-
-    const { author, title, body } = req.body;
-    const isInvalid = !author || !title || !body
-        || typeof author !== 'string' || author.length > 128
-        || typeof title !== 'string' || author.length > 512
-        || typeof body !== 'string';
-    if (isInvalid) {
-        res.status(400).end({ error: 'invalid request' });
-        return;
-    }
-
-    const { rows } = await pool.query(
-        'INSERT INTO questions(id, author, title, body, created) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-        [uuidv4(), author, title, body]
-    );
-
-    const jsonResponse: api.Question = {
-        ...rows[0],
-        answers: []
-    };
-    res.json(jsonResponse);
 });
 
 router.post('/:id/answers', async (req, res) => {
@@ -91,24 +108,33 @@ router.post('/:id/answers', async (req, res) => {
             return;
         }
 
-        const { author, body } = req.body;
-        const isInvalid = !author || !body
-            || typeof author !== 'string' || author.length > 128
-            || typeof body !== 'string';
-        if (isInvalid) {
+        const { body } = req.body;
+        if (!body || typeof body !== 'string' || body.length === 0) {
             res.status(400).end({ error: 'invalid request' });
             return;
         }
 
-        const { rows: [answer] } = await pool.query(
-            'INSERT INTO answers(id, questionId, author, body, created) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-            [uuidv4(), req.params.id, author, body]
+        const token = getDecodedToken(req, res);
+        if (token === null) {
+            return;
+        }
+
+        const { rows: [answer] } = await client.query(
+            `INSERT INTO answers(id, questionId, authorId, body, created)
+            VALUES ($1, $2, $3, $4, NOW())
+            RETURNING id, body, created`,
+            [uuidv4(), req.params.id, token.id, body]
         );
 
-        // eslint-disable-next-line no-shadow
-        const jsonResponse: api.Answer = (({ id, author, body, created }) => ({
-            id, author, body, created
-        }))(answer);
+        const { rows: [{ username }] } = await client.query(
+            'SELECT username FROM users WHERE id = $1',
+            [token.id]
+        );
+
+        const jsonResponse: api.Answer = {
+            ...answer,
+            author: username
+        };
         res.json(jsonResponse);
     } finally {
         client.release();

@@ -3,13 +3,13 @@
 exports[`GET /questions 1`] = `
 Array [
   Object {
-    "author": "Kevin.a",
+    "author": "Kevin",
     "created": "2020-04-21T13:00:00.000Z",
     "id": "9eae28b9-a77b-4f39-901d-140e2d4a710c",
     "title": "favicon.ico 500 error when fetching robots.txt",
   },
   Object {
-    "author": "Mike D",
+    "author": "Mike",
     "created": "2020-04-05T18:16:00.000Z",
     "id": "13ebf57d-4d1d-49db-aa38-301767778c81",
     "title": "Vue recognize text pattern and replace by href to correct resource",
@@ -27,7 +27,7 @@ exports[`GET /questions/:id 1`] = `
 Object {
   "answers": Array [
     Object {
-      "author": "Michael",
+      "author": "Mike",
       "body": "Just do something else.",
       "created": "2020-04-21T15:01:00.000Z",
       "id": "1dc42217-5ef3-40bc-ad66-fd45377359bb",
@@ -39,7 +39,7 @@ Object {
       "id": "df39ad99-64e1-4f9f-8d61-c3b95802dbf8",
     },
   ],
-  "author": "Kevin.a",
+  "author": "Kevin",
   "body": "I have an error 500 on my example.com/robots.txt page.
 
 Could this cause any SEO / crawling issues? It's just the favicon , but you never know.",

@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
-import pool from './pool';
+import { pool } from './common';
 import { JWTPayload } from './types';
 
 const router = Router();
