@@ -6,6 +6,11 @@ import { pool, getDecodedToken } from './common';
 
 const router = Router();
 
+const uuidRegex = /^[0-9A-F]{8}-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+function isUuid(uuid: string) {
+    return uuidRegex.test(uuid);
+}
+
 router.get('/', async (req, res) => {
     const { rows: jsonResponse } = await pool.query<api.QuestionSummary>(
         `SELECT questions.id, username as author, title, created
@@ -18,6 +23,10 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     const client = await pool.connect();
     try {
+        if (!isUuid(req.params.id)) {
+            res.status(404).json({ error: 'not found' });
+            return;
+        }
         const questionResult = await client.query(
             `SELECT questions.id, username as author, title, body, created
             FROM questions
@@ -26,21 +35,22 @@ router.get('/:id', async (req, res) => {
             [req.params.id]
         );
         if (questionResult.rowCount === 0) {
-            res.status(404).end({ error: 'not found' });
-        } else {
-            const { rows: questionAnswers } = await client.query(
-                `SELECT answers.id, users.username as author, body, created
-                FROM answers
-                INNER JOIN users on users.id=answers.authorId
-                WHERE questionId = $1`,
-                [req.params.id]
-            );
-            const jsonResponse: api.Question = {
-                ...questionResult.rows[0],
-                answers: questionAnswers
-            };
-            res.json(jsonResponse);
+            res.status(404).json({ error: 'not found' });
+            return;
         }
+
+        const { rows: questionAnswers } = await client.query(
+            `SELECT answers.id, users.username as author, body, created
+            FROM answers
+            INNER JOIN users on users.id=answers.authorId
+            WHERE questionId = $1`,
+            [req.params.id]
+        );
+        const jsonResponse: api.Question = {
+            ...questionResult.rows[0],
+            answers: questionAnswers
+        };
+        res.json(jsonResponse);
     } finally {
         client.release();
     }
@@ -50,7 +60,7 @@ router.post('/', async (req, res) => {
     const client = await pool.connect();
     try {
         if (req.body === undefined) {
-            res.status(400).end({ error: 'invalid request' });
+            res.status(400).json({ error: 'invalid request' });
             return;
         }
 
@@ -59,7 +69,7 @@ router.post('/', async (req, res) => {
             || typeof title !== 'string' || title.length > 512
             || typeof body !== 'string' || body.length === 0;
         if (isInvalid) {
-            res.status(400).end({ error: 'invalid request' });
+            res.status(400).json({ error: 'invalid request' });
             return;
         }
 
@@ -94,23 +104,27 @@ router.post('/', async (req, res) => {
 router.post('/:id/answers', async (req, res) => {
     const client = await pool.connect();
     try {
+        if (!isUuid(req.params.id)) {
+            res.status(404).json({ error: 'not found' });
+            return;
+        }
         const { rows: [{ count }] } = await client.query(
             'SELECT COUNT(*) FROM questions WHERE id = $1',
             [req.params.id]
         );
         if (count === 0) {
-            res.status(404).end({ error: 'not found' });
+            res.status(404).json({ error: 'not found' });
             return;
         }
 
         if (req.body === undefined) {
-            res.status(400).end({ error: 'invalid request' });
+            res.status(400).json({ error: 'invalid request' });
             return;
         }
 
         const { body } = req.body;
         if (!body || typeof body !== 'string' || body.length === 0) {
-            res.status(400).end({ error: 'invalid request' });
+            res.status(400).json({ error: 'invalid request' });
             return;
         }
 
