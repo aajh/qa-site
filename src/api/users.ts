@@ -10,13 +10,13 @@ const router = Router();
 
 router.post('/users', async (req, res) => {
     if (req.body === undefined) {
-        res.status(400).end({ error: 'invalid request' });
+        res.status(400).json({ error: 'invalid request' });
         return;
     }
 
     const { username, password } = req.body;
     if (typeof username !== 'string' || typeof password !== 'string' || username.length > 128) {
-        res.status(400).end({ error: 'invalid request' });
+        res.status(400).json({ error: 'invalid request' });
         return;
     }
 
@@ -37,13 +37,13 @@ router.post('/users', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     if (req.body === undefined) {
-        res.status(400).end({ error: 'invalid request' });
+        res.status(400).json({ error: 'invalid request' });
         return;
     }
 
     const { username, password } = req.body;
     if (typeof username !== 'string' || typeof password !== 'string') {
-        res.status(400).end({ error: 'invalid request' });
+        res.status(400).json({ error: 'invalid request' });
         return;
     }
 
@@ -70,7 +70,7 @@ router.post('/login', async (req, res) => {
     };
 
     const token = jwt.sign(userForToken, process.env.JWT_SECRET);
-    res.json(token);
+    res.json({ token });
 });
 
 export default router;
