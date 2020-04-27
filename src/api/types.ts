@@ -8,8 +8,12 @@ export interface Login {
 }
 
 export interface JWTPayload {
-    id: string,
+    id: string
     username: string
+    iat: number
+}
+export function checkTokenIsValid(p: JWTPayload) {
+    return typeof p.id === 'string' && typeof p.username === 'string' && typeof p.iat === 'number';
 }
 
 export interface Answer {

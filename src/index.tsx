@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom';
 import { ConnectedRouter } from 'connected-react-router';
 import { Provider } from 'react-redux';
+import { throttle } from 'lodash';
 
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -18,6 +19,15 @@ import NotFound from './components/NotFound';
 import Ask from './components/Ask';
 import Question from './components/Question';
 import QuestionList from './components/QuestionList';
+
+store.subscribe(throttle(() => {
+    try {
+        const state = store.getState();
+        localStorage.setItem('token', state.user.token);
+    } catch {
+        // Ignore errors
+    }
+}, 100));
 
 ReactDOM.render(
     <Provider store={store}>

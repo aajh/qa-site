@@ -1,3 +1,7 @@
 textarea {
     min-height: 8em;
 }
+
+.logged-in-text {
+    margin-right: 1em;
+}
