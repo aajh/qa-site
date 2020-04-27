@@ -38,7 +38,7 @@ app.use((err: any, req: any, res: any, next: any) => {
         next(err);
         return;
     }
-    res.status(err.status);
+    res.status(500).json({ error: 'Internal Server Error' });
 });
 
 const port = process.env.PORT ?? 8080;

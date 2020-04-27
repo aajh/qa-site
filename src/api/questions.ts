@@ -1,23 +1,18 @@
-import express from 'express';
+import Router from 'express-promise-router';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as api from './types';
 import pool from './pool';
 
-const router = express.Router();
+const router = Router();
 
 router.get('/', async (req, res) => {
-    try {
-        const { rows: jsonResponse } = await pool.query<api.QuestionSummary>(
-            `SELECT questions.id, username as author, title, created
-            FROM questions
-            INNER JOIN users ON users.id=questions.authorId`
-        );
-        res.json(jsonResponse);
-    } catch (error) {
-        console.error(error);
-        res.status(500).end();
-    }
+    const { rows: jsonResponse } = await pool.query<api.QuestionSummary>(
+        `SELECT questions.id, username as author, title, created
+        FROM questions
+        INNER JOIN users ON users.id=questions.authorId`
+    );
+    res.json(jsonResponse);
 });
 
 router.get('/:id', async (req, res) => {
@@ -31,7 +26,7 @@ router.get('/:id', async (req, res) => {
             [req.params.id]
         );
         if (questionResult.rowCount === 0) {
-            res.status(404).end();
+            res.status(404).end({ error: 'not found' });
         } else {
             const { rows: questionAnswers } = await client.query(
                 `SELECT answers.id, users.username as author, body, created
@@ -46,45 +41,37 @@ router.get('/:id', async (req, res) => {
             };
             res.json(jsonResponse);
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).end();
     } finally {
         client.release();
     }
 });
 
 router.post('/', async (req, res) => {
-    try {
-        if (req.body === undefined) {
-            res.status(400).end();
-            return;
-        }
-
-        const { author, title, body } = req.body;
-        const isInvalid = !author || !title || !body
-            || typeof author !== 'string' || author.length > 128
-            || typeof title !== 'string' || author.length > 512
-            || typeof body !== 'string';
-        if (isInvalid) {
-            res.status(400).end();
-            return;
-        }
-
-        const { rows } = await pool.query(
-            'INSERT INTO questions(id, author, title, body, created) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-            [uuidv4(), author, title, body]
-        );
-
-        const jsonResponse: api.Question = {
-            ...rows[0],
-            answers: []
-        };
-        res.json(jsonResponse);
-    } catch (error) {
-        console.error(error);
-        res.status(500).end();
+    if (req.body === undefined) {
+        res.status(400).end({ error: 'invalid request' });
+        return;
     }
+
+    const { author, title, body } = req.body;
+    const isInvalid = !author || !title || !body
+        || typeof author !== 'string' || author.length > 128
+        || typeof title !== 'string' || author.length > 512
+        || typeof body !== 'string';
+    if (isInvalid) {
+        res.status(400).end({ error: 'invalid request' });
+        return;
+    }
+
+    const { rows } = await pool.query(
+        'INSERT INTO questions(id, author, title, body, created) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
+        [uuidv4(), author, title, body]
+    );
+
+    const jsonResponse: api.Question = {
+        ...rows[0],
+        answers: []
+    };
+    res.json(jsonResponse);
 });
 
 router.post('/:id/answers', async (req, res) => {
@@ -95,12 +82,12 @@ router.post('/:id/answers', async (req, res) => {
             [req.params.id]
         );
         if (count === 0) {
-            res.status(404).end();
+            res.status(404).end({ error: 'not found' });
             return;
         }
 
         if (req.body === undefined) {
-            res.status(400).end();
+            res.status(400).end({ error: 'invalid request' });
             return;
         }
 
@@ -109,7 +96,7 @@ router.post('/:id/answers', async (req, res) => {
             || typeof author !== 'string' || author.length > 128
             || typeof body !== 'string';
         if (isInvalid) {
-            res.status(400).end();
+            res.status(400).end({ error: 'invalid request' });
             return;
         }
 
@@ -123,9 +110,6 @@ router.post('/:id/answers', async (req, res) => {
             id, author, body, created
         }))(answer);
         res.json(jsonResponse);
-    } catch (error) {
-        console.error(error);
-        res.status(500).end();
     } finally {
         client.release();
     }
