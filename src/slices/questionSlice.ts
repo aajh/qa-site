@@ -88,7 +88,6 @@ export const postAnswer = createAsyncThunk<
 },
 {
     answer: {
-        author: string
         body: string
     }
     questionId: string

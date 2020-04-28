@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { Col, Container, ListGroup, Row, Spinner } from 'react-bootstrap';
 
 import { fetchQuestionList } from '../slices/questionListSlice';
 import { RootState } from '../slices';
@@ -19,12 +20,12 @@ function QuestionItem({ question }: QuestionProps): React.ReactElement {
         minute: 'numeric'
     });
     return (
-        <li className="list-group-item">
+        <ListGroup.Item>
             <h4>
                 <Link to={`/questions/${question.id}`}>{question.title}</Link>
             </h4>
             <small style={{ float: 'right' }}>{`asked ${created} by ${question.author}`}</small>
-        </li>
+        </ListGroup.Item>
     );
 }
 
@@ -39,25 +40,25 @@ export default function QuestionList(): React.ReactElement {
     }, []);
 
     const questionListElement = !loading && questionList.length > 0
-        ? <ul className="list-group">{questionList.map(q => <QuestionItem key={q.id} question={q} />)}</ul>
+        ? <ListGroup>{questionList.map(q => <QuestionItem key={q.id} question={q} />)}</ListGroup>
         : null;
 
     return (
-        <div className="container pt-5">
-            <div className="row justify-content-center">
-                <div className="col-md-10">
+        <Container className="pt-5">
+            <Row className="justify-content-center">
+                <Col md="10">
                     <h1 className="pb-1">Questions</h1>
                     {questionListElement}
                     {loading && (
                         <div className="d-flex justify-content-center">
-                            <div className="spinner-border text-secondary" role="status">
+                            <Spinner animation="border" variant="secondary" role="status">
                                 <span className="sr-only">Loading...</span>
-                            </div>
+                            </Spinner>
                         </div>
                     )}
                     {error !== null && <span>{error}</span>}
-                </div>
-            </div>
-        </div>
+                </Col>
+            </Row>
+        </Container>
     );
 }

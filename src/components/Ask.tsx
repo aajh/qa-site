@@ -5,8 +5,9 @@ import ReactMarkdown from 'react-markdown';
 import { Alert, Button, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 
 import { postQuestion } from '../slices/questionSlice';
-import { showLoginModal } from '../slices/userSlice';
 import { RootState } from '../slices';
+
+import InlineLoginPrompt from './InlineLoginPrompt';
 
 type QuestionForm = {
     title: string,
@@ -26,10 +27,6 @@ export default function Ask() {
 
     async function onSubmit(question: QuestionForm) {
         dispatch(postQuestion(question));
-    }
-
-    function onShowLoginModal() {
-        dispatch(showLoginModal());
     }
 
     const content = user !== null
@@ -75,14 +72,7 @@ export default function Ask() {
                 </Form.Group>
             </Form>
         )
-        : (
-            <div>
-                <Alert variant="info">Please login to ask a question.</Alert>
-                <Row className="justify-content-center">
-                    <Button onClick={onShowLoginModal}>Login</Button>
-                </Row>
-            </div>
-        );
+        : <InlineLoginPrompt message="Please login to ask a question." />;
 
     return (
         <Container className="py-5">

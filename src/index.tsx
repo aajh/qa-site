@@ -8,7 +8,6 @@ import { ConnectedRouter } from 'connected-react-router';
 import { Provider } from 'react-redux';
 import { throttle } from 'lodash';
 
-import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './main.css';
 

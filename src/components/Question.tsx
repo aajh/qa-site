@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import classNames from 'classnames';
 import ReactMarkdown from 'react-markdown';
+import { Alert, Button, Col, Container, Form, ListGroup, Row, Spinner } from 'react-bootstrap';
 
 import * as api from '../api/types';
 import { fetchQuestion, showQuestion, leavingQuestion, postAnswer } from '../slices/questionSlice';
 import { RootState } from '../slices';
+
+import InlineLoginPrompt from './InlineLoginPrompt';
 
 function AnswerItem({ answer }: { answer: api.Answer }) {
     const created = new Date(answer.created).toLocaleString(undefined, {
@@ -19,15 +21,14 @@ function AnswerItem({ answer }: { answer: api.Answer }) {
     });
 
     return (
-        <li className="list-group-item">
+        <ListGroup.Item>
             <ReactMarkdown source={answer.body} />
             <small style={{ float: 'right' }}>{`answered ${created} by ${answer.author}`}</small>
-        </li>
+        </ListGroup.Item>
     );
 }
 
 type AnswerForm = {
-    author: string
     body: string
 };
 function AnswerForm({ questionId } : { questionId: string }) {
@@ -37,53 +38,53 @@ function AnswerForm({ questionId } : { questionId: string }) {
         postingAnswer,
         postingAnswerError
     } = useSelector((state: RootState) => state.question);
+    const [shouldResetForm, setShouldResetForm] = useState(false);
 
     const body = watch('body');
 
+    useEffect(() => {
+        if (shouldResetForm && !postingAnswerError) {
+            reset();
+        }
+        setShouldResetForm(false);
+    }, [postingAnswerError, shouldResetForm]);
+
     async function onSubmit(answer: AnswerForm) {
         await dispatch(postAnswer({ answer, questionId }));
-        reset();
+        setShouldResetForm(true);
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="form-group">
+        <Form id="answer-form" onSubmit={handleSubmit(onSubmit)}>
+            <Form.Group>
                 <h4>Your Answer</h4>
-            </div>
-            <div className="form-group">
-                <label htmlFor="author">Name</label>
-                <input
-                    name="author"
-                    id="author"
-                    type="text"
-                    ref={register({ required: true })}
-                    className={classNames('form-control', { 'is-invalid': errors.author })}
-                />
-                {errors.author && <div className="invalid-feedback">Name is required.</div>}
-            </div>
+            </Form.Group>
 
-            <div className="form-group">
-                <label htmlFor="body">Body</label>
-                <textarea
+            <Form.Group controlId="body">
+                <Form.Label>Body</Form.Label>
+                <Form.Control
                     name="body"
-                    id="body"
+                    as="textarea"
                     ref={register({ required: true })}
-                    className={classNames('form-control', { 'is-invalid': errors.body })}
+                    isInvalid={!!errors.body}
                 />
-                {errors.body && <div className="invalid-feedback">Body is required.</div>}
-            </div>
+                {errors.body && (
+                    <Form.Control.Feedback type="invalid">Body is required.</Form.Control.Feedback>
+                )}
+            </Form.Group>
 
-            <div className="form-group">
-                <button type="submit" disabled={postingAnswer} className="btn btn-primary">
+            {postingAnswerError && <Alert variant="warning">Error while submitting the answer. Please try again.</Alert>}
+
+            <Form.Group>
+                <Button type="submit" disabled={postingAnswer}>
                     {postingAnswer
                         ? [
-                            <span key={0} className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />,
+                            <Spinner key={0} animation="border" size="sm" className="mr-2" role="status" />,
                             'Submitting Answer'
                         ]
                         : 'Submit Answer'}
-                </button>
-            </div>
-            {postingAnswerError !== null && <span>{postingAnswerError}</span>}
+                </Button>
+            </Form.Group>
 
             {body && (
                 <div>
@@ -92,7 +93,7 @@ function AnswerForm({ questionId } : { questionId: string }) {
                     <ReactMarkdown source={body} />
                 </div>
             )}
-        </form>
+        </Form>
     );
 }
 
@@ -102,6 +103,7 @@ export default function Question() {
     const { question, loading, questionWasPosted, loadingError } = useSelector(
         (state: RootState) => state.question
     );
+    const loggedIn = useSelector((state: RootState) => state.user.user) !== null;
 
     useEffect(() => {
         if (question?.id !== id || !questionWasPosted) {
@@ -125,51 +127,53 @@ export default function Question() {
 
         questionDetails = (
             <div>
-                <div className="row">
-                    <div className="col">
+                <Row>
+                    <Col>
                         <h2>{question.title}</h2>
-                    </div>
-                </div>
-                <div className="row pt-3">
-                    <div className="col">
+                    </Col>
+                </Row>
+                <Row className="pt-3">
+                    <Col>
                         <ReactMarkdown source={question.body} />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col">
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
                         <small style={{ float: 'right' }}>{`asked ${created} by ${question.author}`}</small>
-                    </div>
-                </div>
+                    </Col>
+                </Row>
                 {question.answers.length > 0 && (
-                    <div className="row pt-5">
-                        <div className="col">
+                    <Row className="pt-5">
+                        <Col>
                             <h4>{`${question.answers.length} answer${question.answers.length > 1 ? 's' : ''}`}</h4>
-                            <ul className="list-group list-group-flush">
+                            <ListGroup variant="flush">
                                 {question.answers.map(a => <AnswerItem key={a.id} answer={a} />)}
-                            </ul>
-                        </div>
-                    </div>
+                            </ListGroup>
+                        </Col>
+                    </Row>
                 )}
-                <div className="row justify-content-center pb-5">
-                    <div className="col-md-8">
-                        <AnswerForm questionId={id} />
-                    </div>
-                </div>
+                <Row className="justify-content-center pb-5">
+                    <Col md="8">
+                        {loggedIn
+                            ? <AnswerForm questionId={id} />
+                            : <InlineLoginPrompt message="Please login to answer a question" />}
+                    </Col>
+                </Row>
             </div>
         );
     }
 
     return (
-        <div className="container pt-5">
+        <Container className="pt-5">
             {loading && (
                 <div className="d-flex justify-content-center">
-                    <div className="spinner-border text-secondary" role="status">
+                    <Spinner animation="border" variant="secondary" role="status">
                         <span className="sr-only">Loading...</span>
-                    </div>
+                    </Spinner>
                 </div>
             )}
-            {loadingError !== null && <span>{loadingError}</span>}
+            {loadingError && <Alert variant="warning">Error while loading the question. Please try to refresh the page.</Alert>}
             {questionDetails}
-        </div>
+        </Container>
     );
 }

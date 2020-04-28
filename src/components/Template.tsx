@@ -44,7 +44,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
                         </Nav>
                         <Nav>
                             {loggedIn && (
-                                <Navbar.Text className="logged-in-text">{`Logged in as ${user.username}`}</Navbar.Text>
+                                <Navbar.Text className="mr-3">{`Logged in as ${user.username}`}</Navbar.Text>
                             )}
                             {loggedIn
                                 ? <Button onClick={onLogout}>Logout</Button>
