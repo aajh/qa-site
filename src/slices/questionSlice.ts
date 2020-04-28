@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { push, replace } from 'connected-react-router';
 
 import { AppDispatch } from '../store';
+import { RootState } from './index';
 import * as api from '../api/types';
 
 export const fetchQuestion = createAsyncThunk<
@@ -12,7 +13,7 @@ api.Question,
 },
 {
     dispatch: AppDispatch
-    rejectValue: string
+    rejectValue: void
 }
 >(
     'question/fetch',
@@ -26,10 +27,10 @@ api.Question,
                 const newQuestion: api.Question = await response.json();
                 return newQuestion;
             } else {
-                return rejectWithValue(response.status.toString());
+                return rejectWithValue();
             }
         } catch (e) {
-            return rejectWithValue(e.toString());
+            return rejectWithValue();
         }
     }
 );
@@ -38,20 +39,29 @@ export const postQuestion = createAsyncThunk<
 api.Question,
 {
     title: string,
-    author: string,
     body: string
 },
 {
     dispatch: AppDispatch,
-    rejectValue: string
+    state: RootState,
+    rejectValue: void
 }
 >(
-    'question/postNew',
-    async (question, { dispatch, rejectWithValue }) => {
+    'question/postQuestion',
+    async (question, { dispatch, getState, rejectWithValue }) => {
         try {
+            const { user: { token } } = getState();
+
+            if (token === null) {
+                return rejectWithValue();
+            }
+
             const response = await fetch('/api/questions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify(question)
             });
 
@@ -63,10 +73,10 @@ api.Question,
 
                 return createdQuestion;
             } else {
-                return rejectWithValue(response.status.toString());
+                return rejectWithValue();
             }
         } catch (e) {
-            return rejectWithValue(e.toString());
+            return rejectWithValue();
         }
     }
 );
@@ -84,15 +94,25 @@ export const postAnswer = createAsyncThunk<
     questionId: string
 },
 {
-    rejectValue: string
+    state: RootState
+    rejectValue: void
 }
 >(
     'question/postAnswer',
-    async ({ answer, questionId }, { rejectWithValue }) => {
+    async ({ answer, questionId }, { getState, rejectWithValue }) => {
         try {
+            const { user: { token } } = getState();
+
+            if (token === null) {
+                return rejectWithValue();
+            }
+
             const response = await fetch(`/api/questions/${questionId}/answers`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify(answer)
             });
 
@@ -100,10 +120,10 @@ export const postAnswer = createAsyncThunk<
                 const createdAnswer: api.Answer = await response.json();
                 return { answer: createdAnswer, questionId };
             } else {
-                return rejectWithValue(response.status.toString());
+                return rejectWithValue();
             }
         } catch (e) {
-            return rejectWithValue(e.toString());
+            return rejectWithValue();
         }
     }
 );
@@ -112,25 +132,25 @@ export const postAnswer = createAsyncThunk<
 interface QuestionState {
     question: api.Question | null
     loading: boolean
-    loadingError: string | null
+    loadingError: boolean
 
     questionWasPosted: boolean
     postingQuestion: boolean
-    postingQuestionError: string | null
+    postingQuestionError: boolean
 
     postingAnswer: boolean
-    postingAnswerError: string | null
+    postingAnswerError: boolean
 }
 
 const questionInitialState: QuestionState = {
     question: null,
     loading: true,
-    loadingError: null,
+    loadingError: false,
     questionWasPosted: false,
     postingQuestion: false,
-    postingQuestionError: null,
+    postingQuestionError: false,
     postingAnswer: false,
-    postingAnswerError: null
+    postingAnswerError: false
 };
 
 const question = createSlice({
@@ -145,31 +165,31 @@ const question = createSlice({
         leavingQuestion(state) {
             state.question = null;
             state.loading = true;
-            state.loadingError = null;
+            state.loadingError = false;
         }
     },
     extraReducers: builder => {
         builder.addCase(fetchQuestion.pending, state => {
             state.question = null;
             state.loading = true;
-            state.loadingError = null;
+            state.loadingError = false;
         });
         builder.addCase(fetchQuestion.fulfilled, (state, { payload }) => {
             state.question = payload;
             state.loading = false;
             state.questionWasPosted = false;
-            state.loadingError = null;
+            state.loadingError = false;
         });
-        builder.addCase(fetchQuestion.rejected, (state, { payload }) => {
+        builder.addCase(fetchQuestion.rejected, state => {
             state.question = null;
             state.loading = false;
             state.questionWasPosted = false;
-            state.loadingError = payload;
+            state.loadingError = true;
         });
 
         builder.addCase(postQuestion.pending, state => {
             state.postingQuestion = true;
-            state.postingQuestionError = null;
+            state.postingQuestionError = false;
         });
         builder.addCase(postQuestion.fulfilled, (state, { payload }) => {
             state.question = payload;
@@ -177,27 +197,27 @@ const question = createSlice({
             state.loadingError = null;
             state.questionWasPosted = true;
             state.postingQuestion = false;
-            state.postingQuestionError = null;
+            state.postingQuestionError = false;
         });
-        builder.addCase(postQuestion.rejected, (state, { payload }) => {
+        builder.addCase(postQuestion.rejected, state => {
             state.postingQuestion = false;
-            state.postingQuestionError = payload;
+            state.postingQuestionError = true;
         });
 
         builder.addCase(postAnswer.pending, state => {
             state.postingAnswer = true;
-            state.postingAnswerError = null;
+            state.postingAnswerError = false;
         });
         builder.addCase(postAnswer.fulfilled, (state, { payload }) => {
             if (state.question?.id === payload.questionId) {
                 state.question.answers.push(payload.answer);
             }
             state.postingAnswer = false;
-            state.postingAnswerError = null;
+            state.postingAnswerError = false;
         });
-        builder.addCase(postAnswer.rejected, (state, { payload }) => {
+        builder.addCase(postAnswer.rejected, state => {
             state.postingAnswer = false;
-            state.postingAnswerError = payload;
+            state.postingAnswerError = true;
         });
     }
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -71,7 +71,7 @@ export default function LoginModal() {
                 <Button variant="primary" type="submit" form="login-form" disabled={loggingIn}>
                     {loggingIn
                         ? [
-                            <span key={0} className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />,
+                            <Spinner key={0} animation="border" size="sm" className="mr-2" role="status" />,
                             'Logging In'
                         ]
                         : 'Login'}

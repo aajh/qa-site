@@ -1,15 +1,15 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import classNames from 'classnames';
 import ReactMarkdown from 'react-markdown';
+import { Alert, Button, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 
 import { postQuestion } from '../slices/questionSlice';
+import { showLoginModal } from '../slices/userSlice';
 import { RootState } from '../slices';
 
 type QuestionForm = {
     title: string,
-    author: string,
     body: string
 };
 
@@ -19,6 +19,7 @@ export default function Ask() {
         postingQuestion,
         postingQuestionError
     } = useSelector((state: RootState) => state.question);
+    const { user } = useSelector((state: RootState) => state.user);
     const { register, handleSubmit, errors, watch } = useForm<QuestionForm>();
 
     const body = watch('body');
@@ -27,69 +28,77 @@ export default function Ask() {
         dispatch(postQuestion(question));
     }
 
+    function onShowLoginModal() {
+        dispatch(showLoginModal());
+    }
+
+    const content = user !== null
+        ? (
+            <Form id="ask-form" onSubmit={handleSubmit(onSubmit)}>
+                <Form.Group controlId="title">
+                    <Form.Label>Title</Form.Label>
+                    <Form.Control
+                        name="title"
+                        type="text"
+                        ref={register({ required: true })}
+                        isInvalid={!!errors.title}
+                    />
+                    {errors.title && (
+                        <Form.Control.Feedback type="invalid">Title is required.</Form.Control.Feedback>
+                    )}
+                </Form.Group>
+
+                <Form.Group controlId="body">
+                    <Form.Label>Body</Form.Label>
+                    <Form.Control
+                        name="body"
+                        as="textarea"
+                        ref={register({ required: true })}
+                        isInvalid={!!errors.body}
+                    />
+                    {errors.body && (
+                        <Form.Control.Feedback type="invalid">Body is required.</Form.Control.Feedback>
+                    )}
+                </Form.Group>
+
+                {postingQuestionError && <Alert variant="warning">Error while submitting the question. Please try again.</Alert>}
+
+                <Form.Group className="d-flex flex-row-reverse">
+                    <Button type="submit" disabled={postingQuestion}>
+                        {postingQuestion
+                            ? [
+                                <Spinner key={0} animation="border" size="sm" className="mr-2" role="status" />,
+                                'Submitting Question'
+                            ]
+                            : 'Submit Question'}
+                    </Button>
+                </Form.Group>
+            </Form>
+        )
+        : (
+            <div>
+                <Alert variant="info">Please login to ask a question.</Alert>
+                <Row className="justify-content-center">
+                    <Button onClick={onShowLoginModal}>Login</Button>
+                </Row>
+            </div>
+        );
+
     return (
-        <div className="container py-5">
-            <div className="row justify-content-center">
-                <div className="col-md-8">
+        <Container className="py-5">
+            <Row className="justify-content-center">
+                <Col md="8">
                     <h1>Ask a Question</h1>
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        <div className="form-group">
-                            <label htmlFor="title">Title</label>
-                            <input
-                                name="title"
-                                id="title"
-                                type="text"
-                                ref={register({ required: true })}
-                                className={classNames('form-control', { 'is-invalid': errors.title })}
-                            />
-                            {errors.title && <div className="invalid-feedback">Title is required.</div>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="author">Name</label>
-                            <input
-                                name="author"
-                                id="author"
-                                type="text"
-                                ref={register({ required: true })}
-                                className={classNames('form-control', { 'is-invalid': errors.author })}
-                            />
-                            {errors.author && <div className="invalid-feedback">Name is required.</div>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="body">Body</label>
-                            <textarea
-                                name="body"
-                                id="body"
-                                ref={register({ required: true })}
-                                className={classNames('form-control', { 'is-invalid': errors.body })}
-                            />
-                            {errors.body && <div className="invalid-feedback">Body is required.</div>}
-                        </div>
-
-                        <div className="form-group">
-                            <button type="submit" disabled={postingQuestion} className="btn btn-primary">
-                                {postingQuestion
-                                    ? [
-                                        <span key={0} className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />,
-                                        'Submitting Question'
-                                    ]
-                                    : 'Submit Question'}
-                            </button>
-                        </div>
-
-                        {postingQuestionError !== null && <span>{postingQuestionError}</span>}
-                    </form>
-                    {body && (
+                    {content}
+                    {user !== null && body && (
                         <div>
                             <h3 className="pt-3">Question Preview</h3>
                             <hr />
                             <ReactMarkdown source={body} />
                         </div>
                     )}
-                </div>
-            </div>
-        </div>
+                </Col>
+            </Row>
+        </Container>
     );
 }
