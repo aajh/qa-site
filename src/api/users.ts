@@ -9,37 +9,50 @@ import { JWTPayload } from './types';
 const router = Router();
 
 router.post('/users', async (req, res) => {
-    if (req.body === undefined) {
-        res.status(400).json({ error: 'invalid request' });
-        return;
+    const client = await pool.connect();
+    try {
+        if (req.body === undefined) {
+            res.status(400).json({ error: 'invalid request' });
+            return;
+        }
+
+        const { username, password } = req.body;
+        if (typeof username !== 'string' || typeof password !== 'string' || username.length > 128) {
+            res.status(400).json({ error: 'invalid request' });
+            return;
+        }
+
+        // TODO: Give error if the username exists.
+        const { rows: [{ count }] } = await client.query(
+            'SELECT COUNT(*) FROM users WHERE username = $1',
+            [username]
+        );
+        if (count !== 0) {
+            res.status(403).json({ error: 'username exists' });
+            return;
+        }
+
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        const id = uuidv4();
+
+        await client.query(
+            'INSERT INTO users(id, username, passwordHash) VALUES ($1, $2, $3)',
+            [id, username, passwordHash]
+        );
+
+        const userForToken: JWTPayload = {
+            id,
+            username,
+            iat: 0,
+        };
+
+        const token = jwt.sign(userForToken, process.env.JWT_SECRET);
+        res.json({ token });
+    } finally {
+        client.release();
     }
-
-    const { username, password } = req.body;
-    if (typeof username !== 'string' || typeof password !== 'string' || username.length > 128) {
-        res.status(400).json({ error: 'invalid request' });
-        return;
-    }
-
-    // TODO: Give error if the username exists.
-
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-
-    const id = uuidv4();
-
-    await pool.query(
-        'INSERT INTO users(id, username, passwordHash) VALUES ($1, $2, $3)',
-        [id, username, passwordHash]
-    );
-
-    const userForToken: JWTPayload = {
-        id,
-        username,
-        iat: 0,
-    };
-
-    const token = jwt.sign(userForToken, process.env.JWT_SECRET);
-    res.json({ token });
 });
 
 router.post('/login', async (req, res) => {

@@ -55,7 +55,7 @@ string,
                 const { token }: api.Login = await response.json();
                 return token;
             } else {
-                return rejectWithValue(response.status === 401);
+                return rejectWithValue(response.status === 403);
             }
         } catch (error) {
             return rejectWithValue(false);
@@ -76,6 +76,7 @@ export interface UserState {
     showRegistrationModal: boolean
     registering: boolean
     registrationError: boolean
+    usernameInUse: boolean
 }
 
 export const userInitialState: UserState = {
@@ -90,6 +91,7 @@ export const userInitialState: UserState = {
     showRegistrationModal: false,
     registering: false,
     registrationError: false,
+    usernameInUse: false,
 };
 
 const user = createSlice({
@@ -116,6 +118,7 @@ const user = createSlice({
                 showRegistrationModal: true,
                 registering: false,
                 registrationError: false,
+                usernameInUse: false,
             };
         },
         closeRegistrationModal(state) {
@@ -142,15 +145,17 @@ const user = createSlice({
         builder.addCase(register.pending, state => {
             state.registering = true;
             state.registrationError = false;
+            state.usernameInUse = false;
         });
         builder.addCase(register.fulfilled, (_, { payload: token }) => ({
             ...userInitialState,
             token,
             user: jwt.decode(token) as api.JWTPayload,
         }));
-        builder.addCase(register.rejected, state => {
+        builder.addCase(register.rejected, (state, { payload }) => {
             state.registering = false;
-            state.registrationError = true;
+            state.registrationError = !payload;
+            state.usernameInUse = payload;
         });
     }
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,9 +16,17 @@ export default function RegistrationModal() {
     const {
         showRegistrationModal,
         registering,
-        registrationError
+        registrationError,
+        usernameInUse,
     } = useSelector((state: RootState) => state.user);
     const { register, handleSubmit, errors } = useForm<RegistrationForm>();
+    const usernameEl = useRef(null);
+
+    useEffect(() => {
+        if (usernameInUse) {
+            usernameEl?.current?.focus();
+        }
+    }, [usernameInUse, usernameEl]);
 
     function onSubmit(registrationInformation: RegistrationForm) {
         dispatch(registerAction(registrationInformation));
@@ -39,7 +47,10 @@ export default function RegistrationModal() {
                         <Form.Control
                             name="username"
                             type="input"
-                            ref={register({ required: true })}
+                            ref={(e: HTMLInputElement) => {
+                                usernameEl.current = e;
+                                register(e, { required: true });
+                            }}
                             isInvalid={!!errors.username}
                         />
                         { errors.username && (
@@ -59,6 +70,7 @@ export default function RegistrationModal() {
                         )}
                     </Form.Group>
 
+                    {usernameInUse && <Alert variant="warning">Username in use. Please choose another name.</Alert>}
                     {registrationError && <Alert variant="warning">Error while registering. Please try again.</Alert>}
                 </Form>
             </Modal.Body>
