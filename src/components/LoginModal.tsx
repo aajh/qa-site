@@ -42,6 +42,7 @@ export default function LoginModal() {
                             type="input"
                             ref={register({ required: true })}
                             isInvalid={!!errors.username}
+                            autoComplete="username"
                         />
                         { errors.username && (
                             <Form.Control.Feedback type="invalid">Username is required.</Form.Control.Feedback>
@@ -54,6 +55,7 @@ export default function LoginModal() {
                             type="password"
                             ref={register({ required: true })}
                             isInvalid={!!errors.password}
+                            autoComplete="current-password"
                         />
                         { errors.password && (
                             <Form.Control.Feedback type="invalid">Password is required.</Form.Control.Feedback>
