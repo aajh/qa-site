@@ -18,9 +18,8 @@ test('POST /users', async () => {
         body: JSON.stringify(user),
     });
     expect(response.ok).toBe(true);
-    const createdUser: api.User = await response.json();
-    expect(createdUser.id).toBeDefined();
-    expect(createdUser.username).toBe(user.username);
+    const { token }: api.Login = await response.json();
+    expect(token).toBeDefined();
 });
 
 it('should fail to create user with the same username', async () => {

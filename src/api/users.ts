@@ -32,7 +32,14 @@ router.post('/users', async (req, res) => {
         [id, username, passwordHash]
     );
 
-    res.json({ id, username });
+    const userForToken: JWTPayload = {
+        id,
+        username,
+        iat: 0,
+    };
+
+    const token = jwt.sign(userForToken, process.env.JWT_SECRET);
+    res.json({ token });
 });
 
 router.post('/login', async (req, res) => {

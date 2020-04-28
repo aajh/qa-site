@@ -4,9 +4,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button, Container, Navbar, Nav } from 'react-bootstrap';
 
 import { RootState } from '../slices';
-import { logout, showLoginModal } from '../slices/userSlice';
+import { logout, showLoginModal, showRegistrationModal } from '../slices/userSlice';
 import { fetchQuestionList } from '../slices/questionListSlice';
 import LoginModal from './LoginModal';
+import RegistrationModal from './RegistrationModal';
 
 export default function Template({ children }: { children: React.ReactNode }) {
     const dispatch = useDispatch();
@@ -25,6 +26,9 @@ export default function Template({ children }: { children: React.ReactNode }) {
         }
     }
 
+    function onShowRegistrationModal() {
+        dispatch(showRegistrationModal());
+    }
     function onShowLoginModal() {
         dispatch(showLoginModal());
     }
@@ -48,13 +52,17 @@ export default function Template({ children }: { children: React.ReactNode }) {
                             )}
                             {loggedIn
                                 ? <Button onClick={onLogout}>Logout</Button>
-                                : <Button onClick={onShowLoginModal}>Login</Button>}
+                                : <Button onClick={onShowLoginModal} className="mr-3" variant="secondary">Login</Button>}
+                            {!loggedIn && (
+                                <Button onClick={onShowRegistrationModal}>Register</Button>
+                            )}
                         </Nav>
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
             {children}
             <LoginModal />
+            <RegistrationModal />
         </div>
     );
 }
