@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken';
 
 import * as api from '../api/types';
 
+enum LoginError {
+    Error,
+    WrongUsernameOrPassword,
+}
 export const login = createAsyncThunk<
 string,
 {
@@ -10,7 +14,7 @@ string,
     password: string
 },
 {
-    rejectValue: boolean
+    rejectValue: LoginError
 }
 >(
     'user/login',
@@ -25,14 +29,22 @@ string,
                 const { token }: api.Login = await response.json();
                 return token;
             } else {
-                return rejectWithValue(response.status === 401);
+                return rejectWithValue(
+                    response.status === 401
+                        ? LoginError.WrongUsernameOrPassword
+                        : LoginError.Error
+                );
             }
         } catch (error) {
-            return rejectWithValue(false);
+            return rejectWithValue(LoginError.Error);
         }
     }
 );
 
+enum RegistrationError {
+    Error,
+    UsernameInUse,
+}
 export const register = createAsyncThunk<
 string,
 {
@@ -40,7 +52,7 @@ string,
     password: string
 },
 {
-    rejectValue: boolean
+    rejectValue: RegistrationError
 }
 >(
     'user/register',
@@ -55,10 +67,14 @@ string,
                 const { token }: api.Login = await response.json();
                 return token;
             } else {
-                return rejectWithValue(response.status === 403);
+                return rejectWithValue(
+                    response.status === 403
+                        ? RegistrationError.UsernameInUse
+                        : RegistrationError.Error
+                );
             }
         } catch (error) {
-            return rejectWithValue(false);
+            return rejectWithValue(RegistrationError.Error);
         }
     }
 );
@@ -71,7 +87,7 @@ export interface UserState {
     showLoginModal: boolean
     loggingIn: boolean
     loginError: boolean
-    wrongPasswordOrUsername: boolean
+    wrongUsernameOrPassword: boolean
 
     showRegistrationModal: boolean
     registering: boolean
@@ -86,7 +102,7 @@ export const userInitialState: UserState = {
     showLoginModal: false,
     loggingIn: false,
     loginError: false,
-    wrongPasswordOrUsername: false,
+    wrongUsernameOrPassword: false,
 
     showRegistrationModal: false,
     registering: false,
@@ -129,7 +145,7 @@ const user = createSlice({
         builder.addCase(login.pending, state => {
             state.loggingIn = true;
             state.loginError = false;
-            state.wrongPasswordOrUsername = false;
+            state.wrongUsernameOrPassword = false;
         });
         builder.addCase(login.fulfilled, (_, { payload: token }) => ({
             ...userInitialState,
@@ -138,8 +154,8 @@ const user = createSlice({
         }));
         builder.addCase(login.rejected, (state, { payload }) => {
             state.loggingIn = false;
-            state.loginError = !payload;
-            state.wrongPasswordOrUsername = payload;
+            state.loginError = payload === LoginError.Error;
+            state.wrongUsernameOrPassword = payload === LoginError.WrongUsernameOrPassword;
         });
 
         builder.addCase(register.pending, state => {
@@ -154,8 +170,8 @@ const user = createSlice({
         }));
         builder.addCase(register.rejected, (state, { payload }) => {
             state.registering = false;
-            state.registrationError = !payload;
-            state.usernameInUse = payload;
+            state.registrationError = payload === RegistrationError.Error;
+            state.usernameInUse = payload === RegistrationError.UsernameInUse;
         });
     }
 });

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Col, Container, ListGroup, Row, Spinner } from 'react-bootstrap';
+import { Alert, Col, Container, ListGroup, Row, Spinner } from 'react-bootstrap';
 
 import { fetchQuestionList } from '../slices/questionListSlice';
 import { RootState } from '../slices';
@@ -56,7 +56,7 @@ export default function QuestionList(): React.ReactElement {
                             </Spinner>
                         </div>
                     )}
-                    {error !== null && <span>{error}</span>}
+                    {error && <Alert variant="warning">Error while loading questions. Please try to refresh the page.</Alert>}
                 </Col>
             </Row>
         </Container>

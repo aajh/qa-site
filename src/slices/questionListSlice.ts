@@ -6,7 +6,7 @@ export const fetchQuestionList = createAsyncThunk<
 api.QuestionSummary[],
 void,
 {
-    rejectValue: string
+    rejectValue: void
 }
 >(
     'questionList/fetch',
@@ -17,10 +17,10 @@ void,
                 const newQuestionList: api.QuestionSummary[] = await response.json();
                 return newQuestionList;
             } else {
-                return rejectWithValue(response.ok.toString());
+                return rejectWithValue();
             }
         } catch (e) {
-            return rejectWithValue(e.toString());
+            return rejectWithValue();
         }
     }
 );
@@ -29,13 +29,13 @@ void,
 interface QuestionListState {
     questionList: api.QuestionSummary[]
     loading: boolean
-    error: string | null
+    error: boolean
 }
 
 const initialState: QuestionListState = {
     questionList: [],
     loading: true,
-    error: null,
+    error: false,
 };
 
 const questionList = createSlice({
@@ -45,17 +45,17 @@ const questionList = createSlice({
     extraReducers: builder => {
         builder.addCase(fetchQuestionList.pending, state => {
             state.loading = true;
-            state.error = null;
+            state.error = false;
         });
         builder.addCase(fetchQuestionList.fulfilled, (state, { payload }) => {
             state.questionList = payload;
             state.loading = false;
-            state.error = null;
+            state.error = false;
         });
-        builder.addCase(fetchQuestionList.rejected, (state, { payload }) => {
+        builder.addCase(fetchQuestionList.rejected, state => {
             state.questionList = [];
             state.loading = false;
-            state.error = payload;
+            state.error = true;
         });
     }
 });

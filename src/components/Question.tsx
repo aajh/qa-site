@@ -156,7 +156,7 @@ export default function Question() {
                     <Col md="8">
                         {loggedIn
                             ? <AnswerForm questionId={id} />
-                            : <InlineLoginPrompt message="Please login to answer a question" />}
+                            : <InlineLoginPrompt message="Please login to answer the question" />}
                     </Col>
                 </Row>
             </div>

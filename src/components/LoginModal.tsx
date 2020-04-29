@@ -16,7 +16,7 @@ export default function LoginModal() {
     const {
         showLoginModal,
         loggingIn,
-        wrongPasswordOrUsername,
+        wrongUsernameOrPassword,
         loginError
     } = useSelector((state: RootState) => state.user);
     const { register, handleSubmit, errors } = useForm<LoginForm>();
@@ -62,7 +62,7 @@ export default function LoginModal() {
                         )}
                     </Form.Group>
 
-                    {wrongPasswordOrUsername && <Alert variant="warning">Wrong username or password. Please try again.</Alert>}
+                    {wrongUsernameOrPassword && <Alert variant="warning">Wrong username or password. Please try again.</Alert>}
                     {loginError && <Alert variant="warning">Error while logging in. Please try again.</Alert>}
                 </Form>
             </Modal.Body>
