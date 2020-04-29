@@ -9,6 +9,7 @@ import { RootState } from '../slices';
 interface RegistrationForm {
     username: string
     password: string
+    passwordConfirmation: string
 }
 
 export default function RegistrationModal() {
@@ -19,7 +20,7 @@ export default function RegistrationModal() {
         registrationError,
         usernameInUse,
     } = useSelector((state: RootState) => state.user);
-    const { register, handleSubmit, errors } = useForm<RegistrationForm>();
+    const { register, handleSubmit, errors, watch } = useForm<RegistrationForm>();
     const usernameEl = useRef(null);
 
     useEffect(() => {
@@ -28,11 +29,16 @@ export default function RegistrationModal() {
         }
     }, [usernameInUse, usernameEl]);
 
-    function onSubmit(registrationInformation: RegistrationForm) {
-        dispatch(registerAction(registrationInformation));
+    function onSubmit({ username, password }: RegistrationForm) {
+        dispatch(registerAction({ username, password }));
     }
     function onHide() {
         dispatch(closeRegistrationModal());
+    }
+
+    const passwordValue = watch('password');
+    function validatePasswordConfirmation(value: string) {
+        return value === passwordValue;
     }
 
     return (
@@ -69,6 +75,25 @@ export default function RegistrationModal() {
                         />
                         { errors.password && (
                             <Form.Control.Feedback type="invalid">Password is required.</Form.Control.Feedback>
+                        )}
+                    </Form.Group>
+                    <Form.Group controlId="password">
+                        <Form.Label>Password Confirmation</Form.Label>
+                        <Form.Control
+                            name="passwordConfirmation"
+                            type="password"
+                            ref={register({
+                                required: true,
+                                validate: validatePasswordConfirmation
+                            })}
+                            isInvalid={!!errors.passwordConfirmation}
+                            autoComplete="new-password"
+                        />
+                        { errors.passwordConfirmation?.type === 'required' && (
+                            <Form.Control.Feedback type="invalid">Password confirmation is required.</Form.Control.Feedback>
+                        )}
+                        { errors.passwordConfirmation?.type === 'validate' && (
+                            <Form.Control.Feedback type="invalid">Passwords must match.</Form.Control.Feedback>
                         )}
                     </Form.Group>
 

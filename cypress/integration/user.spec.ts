@@ -44,6 +44,7 @@ describe('Users', () => {
 
         cy.get('input[name=username]').type(username);
         cy.get('input[name=password]').type(password);
+        cy.get('input[name=passwordConfirmation]').type(password);
         cy.get('button[form=registration-form]').click();
 
         cy.get('nav').should('contain', username);
@@ -59,8 +60,22 @@ describe('Users', () => {
 
         cy.get('input[name=username]').type(username);
         cy.get('input[name=password]').type(password);
+        cy.get('input[name=passwordConfirmation]').type(password);
         cy.get('button[form=registration-form]').click();
 
         cy.get('form').should('contain', 'Username in use');
+    });
+
+    it('requires matching password', () => {
+        const username = 'Test';
+
+        cy.get('nav').contains('Register').click();
+
+        cy.get('input[name=username]').type(username);
+        cy.get('input[name=password]').type('a');
+        cy.get('input[name=passwordConfirmation]').type('b');
+        cy.get('button[form=registration-form]').click();
+
+        cy.get('form').should('contain', 'Passwords must match');
     });
 });
