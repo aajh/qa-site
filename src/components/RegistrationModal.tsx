@@ -77,7 +77,7 @@ export default function RegistrationModal() {
                             <Form.Control.Feedback type="invalid">Password is required.</Form.Control.Feedback>
                         )}
                     </Form.Group>
-                    <Form.Group controlId="password">
+                    <Form.Group controlId="passwordConfirmation">
                         <Form.Label>Password Confirmation</Form.Label>
                         <Form.Control
                             name="passwordConfirmation"
