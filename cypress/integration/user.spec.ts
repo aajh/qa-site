@@ -1,6 +1,7 @@
 describe('Users', () => {
     beforeEach(() => {
         cy.task('resetAndSeedDatabase');
+        cy.clearLocalStorage();
         cy.visit('/');
     });
 
@@ -20,6 +21,19 @@ describe('Users', () => {
         cy.get('nav').contains('Logout').click();
 
         cy.get('nav').should('contain', 'Login');
+    });
+
+    it('gives error with wrong username or password', () => {
+        const username = 'Login Fail Test';
+        const password = 'wrong';
+
+        cy.get('nav').contains('Login').click();
+
+        cy.get('input[name=username]').type(username);
+        cy.get('input[name=password]').type(password);
+        cy.get('button[form=login-form]').click();
+
+        cy.get('.alert').should('contain', 'Wrong username or password');
     });
 
     it('registers and logins a new user', () => {
