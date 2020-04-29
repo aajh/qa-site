@@ -112,7 +112,7 @@ router.post('/:id/answers', async (req, res) => {
             'SELECT COUNT(*) FROM questions WHERE id = $1',
             [req.params.id]
         );
-        if (count === 0) {
+        if (Number(count) === 0) {
             res.status(404).json({ error: 'not found' });
             return;
         }

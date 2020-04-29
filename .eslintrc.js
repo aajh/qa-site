@@ -25,5 +25,6 @@ module.exports = {
         "@typescript-eslint/no-use-before-define": "off",
         "react/jsx-indent-props": ["error", 4],
         "no-restricted-syntax": "off",
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["cypress/**/*.ts"]}]
     },
 };

@@ -75,7 +75,7 @@ function AnswerForm({ questionId } : { questionId: string }) {
 
             {postingAnswerError && <Alert variant="warning">Error while submitting the answer. Please try again.</Alert>}
 
-            <Form.Group>
+            <Form.Group className="d-flex flex-row-reverse">
                 <Button type="submit" disabled={postingAnswer}>
                     {postingAnswer
                         ? [

@@ -1,21 +1,17 @@
-// ***********************************************************
-// This example plugins/index.js can be used to load plugins
-//
-// You can change the location of this file or turn off loading
-// the plugins file with the 'pluginsFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/plugins-guide
-// ***********************************************************
+import DBMigrate from 'db-migrate';
 
-// This function is called when a project is opened or re-opened (e.g. due to
-// the project's config changing)
-
-/**
- * @type {Cypress.PluginConfig}
- */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-module.exports = (_on: Cypress.PluginEvents, _config: Cypress.PluginConfigOptions) => {
-    // `on` is used to hook into various events Cypress emits
-    // `config` is the resolved Cypress config
+module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+    on('task', {
+        async resetAndSeedDatabase() {
+            const dbmigrate = DBMigrate.getInstance(true, {
+                env: 'test'
+            });
+            dbmigrate.silence(true);
+
+            await dbmigrate.reset('test');
+            await dbmigrate.up('test');
+            return null;
+        }
+    });
 };

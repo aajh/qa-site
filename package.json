@@ -20,11 +20,9 @@
     "clean": "rm -rf dist",
     "test": "cypress run",
     "cy:open": "cypress open",
-    "ci": "npm-run-all build:dev db:test:up && PORT=3333 NODE_ENV=test start-server-and-test start http://localhost:3333",
+    "ci": "start-server-and-test start:test http://localhost:3333",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "db:test:up": "db-migrate up -e test",
-    "db:test:reset": "db-migrate reset:test -e test",
-    "db:test:seed": "db-migrate up:test -e test"
+    "db:test:up": "db-migrate up -e test"
   },
   "author": "Aapo Hanski",
   "license": "ISC",
@@ -69,7 +67,6 @@
     "terser-webpack-plugin": "^2.3.5",
     "ts-loader": "^7.0.1",
     "typescript": "^3.8.3",
-    "wait-on": "^4.0.2",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
     "webpack-dev-middleware": "^3.7.2",

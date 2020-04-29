@@ -22,12 +22,11 @@ router.post('/users', async (req, res) => {
             return;
         }
 
-        // TODO: Give error if the username exists.
         const { rows: [{ count }] } = await client.query(
             'SELECT COUNT(*) FROM users WHERE username = $1',
             [username]
         );
-        if (count !== 0) {
+        if (Number(count) !== 0) {
             res.status(403).json({ error: 'username exists' });
             return;
         }
