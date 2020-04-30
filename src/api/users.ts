@@ -47,7 +47,7 @@ router.post('/users', async (req, res) => {
             iat: 0,
         };
 
-        const token = jwt.sign(userForToken, process.env.JWT_SECRET);
+        const token = jwt.sign(userForToken, process.env.JWT_SECRET as string);
         res.json({ token });
     } finally {
         client.release();
@@ -89,7 +89,7 @@ router.post('/login', async (req, res) => {
         iat: 0,
     };
 
-    const token = jwt.sign(userForToken, process.env.JWT_SECRET);
+    const token = jwt.sign(userForToken, process.env.JWT_SECRET as string);
     res.json({ token });
 });
 

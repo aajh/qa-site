@@ -15,7 +15,8 @@ router.get('/', async (req, res) => {
     const { rows: jsonResponse } = await pool.query<api.QuestionSummary>(
         `SELECT questions.id, username as author, title, created
         FROM questions
-        INNER JOIN users ON users.id=questions.authorId`
+        INNER JOIN users ON users.id=questions.authorId
+        ORDER BY created DESC`
     );
     res.json(jsonResponse);
 });
@@ -43,7 +44,8 @@ router.get('/:id', async (req, res) => {
             `SELECT answers.id, users.username as author, body, created
             FROM answers
             INNER JOIN users on users.id=answers.authorId
-            WHERE questionId = $1`,
+            WHERE questionId = $1
+            ORDER BY created DESC`,
             [req.params.id]
         );
         const jsonResponse: api.Question = {

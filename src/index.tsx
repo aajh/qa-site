@@ -22,7 +22,7 @@ import QuestionList from './components/QuestionList';
 store.subscribe(throttle(() => {
     try {
         const state = store.getState();
-        localStorage.setItem('token', state.user.token);
+        localStorage.setItem('token', state.user.token ?? '');
     } catch {
         // Ignore errors
     }

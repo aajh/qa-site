@@ -17,8 +17,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
     } = useSelector((state: RootState) => state.questionList);
     const { user } = useSelector((state: RootState) => state.user);
 
-    const loggedIn = user !== null;
-
     function onHomeClick() {
         // If questionList.length === 0, QuestionList initiates loading.
         if (!loadingQuestionList && questionList.length !== 0) {
@@ -47,13 +45,13 @@ export default function Template({ children }: { children: React.ReactNode }) {
                             <NavLink to="/questions/ask" className="nav-item nav-link">Ask</NavLink>
                         </Nav>
                         <Nav>
-                            {loggedIn && (
+                            {user !== null && (
                                 <Navbar.Text className="mr-3">{`Logged in as ${user.username}`}</Navbar.Text>
                             )}
-                            {loggedIn
+                            {user !== null
                                 ? <Button onClick={onLogout}>Logout</Button>
                                 : <Button onClick={onShowLoginModal} className="mr-3" variant="secondary">Login</Button>}
-                            {!loggedIn && (
+                            {user === null && (
                                 <Button onClick={onShowRegistrationModal}>Register</Button>
                             )}
                         </Nav>

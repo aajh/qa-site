@@ -21,11 +21,11 @@ export default function RegistrationModal() {
         usernameInUse,
     } = useSelector((state: RootState) => state.user);
     const { register, handleSubmit, errors, watch } = useForm<RegistrationForm>();
-    const usernameEl = useRef(null);
+    const usernameEl: React.MutableRefObject<HTMLInputElement | null> = useRef(null);
 
     useEffect(() => {
-        if (usernameInUse) {
-            usernameEl?.current?.focus();
+        if (usernameInUse && usernameEl?.current) {
+            usernameEl.current.focus();
         }
     }, [usernameInUse, usernameEl]);
 

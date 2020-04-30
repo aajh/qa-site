@@ -106,10 +106,12 @@ export default function Question() {
     const loggedIn = useSelector((state: RootState) => state.user.user) !== null;
 
     useEffect(() => {
-        if (question?.id !== id || !questionWasPosted) {
-            dispatch(fetchQuestion({ id }));
+        if (id !== undefined) {
+            if (question?.id !== id || !questionWasPosted) {
+                dispatch(fetchQuestion({ id }));
+            }
+            dispatch(showQuestion(id));
         }
-        dispatch(showQuestion(id));
         return () => {
             dispatch(leavingQuestion());
         };
@@ -154,7 +156,7 @@ export default function Question() {
                 )}
                 <Row className="justify-content-center pb-5">
                     <Col md="8">
-                        {loggedIn
+                        {loggedIn && id
                             ? <AnswerForm questionId={id} />
                             : <InlineLoginPrompt message="Please login to answer the question" />}
                     </Col>

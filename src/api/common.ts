@@ -11,7 +11,7 @@ const connectionVariables: Record<string, string> = {
 };
 
 export const pool = new pg.Pool({
-    connectionString: process.env[connectionVariables[process.env.NODE_ENV]]
+    connectionString: process.env[connectionVariables[process.env.NODE_ENV ?? 'development']]
 });
 
 export function getDecodedToken(req: express.Request, res: express.Response): JWTPayload | null {
@@ -23,7 +23,7 @@ export function getDecodedToken(req: express.Request, res: express.Response): JW
     let decodedToken: JWTPayload | null = null;
     try {
         if (token) {
-            decodedToken = jwt.verify(token, process.env.JWT_SECRET) as JWTPayload;
+            decodedToken = jwt.verify(token, process.env.JWT_SECRET as string) as JWTPayload;
         }
     } catch (error) {
         // eslint-disable-next-line no-console

@@ -44,7 +44,7 @@ export default function QuestionList(): React.ReactElement {
         : null;
 
     return (
-        <Container className="pt-5">
+        <Container className="py-5">
             <Row className="justify-content-center">
                 <Col md="10">
                     <h1 className="pb-1">Questions</h1>
