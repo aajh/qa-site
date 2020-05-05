@@ -13,13 +13,21 @@ api.Question,
 },
 {
     dispatch: AppDispatch
+    state: RootState
     rejectValue: void
 }
 >(
     'question/fetch',
-    async ({ id, redirectOn404 = true }, { dispatch, rejectWithValue }) => {
+    async ({ id, redirectOn404 = true }, { dispatch, getState, rejectWithValue }) => {
         try {
-            const response = await fetch(`/api/questions/${id}`);
+            const { user: { token } } = getState();
+
+            const response = await fetch(`/api/questions/${id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token !== null ? `Bearer ${token}` : '',
+                },
+            });
             if (response.status === 404 && redirectOn404) {
                 dispatch(replace('/404'));
             }
@@ -127,6 +135,47 @@ export const postAnswer = createAsyncThunk<
     }
 );
 
+export const voteAnswer = createAsyncThunk<
+{
+    questionId: string
+    answerId: string
+    direction: 1 | -1 | null
+},
+{
+    questionId: string
+    answerId: string
+    direction: 1 | -1 | null
+},
+{
+    state: RootState
+    rejectValue: void
+}
+>(
+    'question/voteAnswer',
+    async ({ questionId, answerId, direction }, { getState, rejectWithValue }) => {
+        try {
+            const { user: { token } } = getState();
+
+            const response = await fetch(`/api/questions/${questionId}/answers/${answerId}/vote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ direction })
+            });
+
+            if (response.ok) {
+                return { questionId, answerId, direction };
+            } else {
+                return rejectWithValue();
+            }
+        } catch (e) {
+            return rejectWithValue();
+        }
+    }
+);
+
 
 interface QuestionState {
     question: api.Question | null
@@ -218,6 +267,17 @@ const question = createSlice({
             state.postingAnswer = false;
             state.postingAnswerError = true;
         });
+
+        builder.addCase(voteAnswer.fulfilled,
+            (state, { payload: { questionId, answerId, direction } }) => {
+                if (state.question?.id === questionId) {
+                    const answer = state.question.answers.find(a => a.id === answerId);
+                    if (answer !== undefined) {
+                        answer.votes += (direction ?? 0) - (answer.voteDirection ?? 0);
+                        answer.voteDirection = direction;
+                    }
+                }
+            });
     }
 });
 

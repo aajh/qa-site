@@ -6,12 +6,58 @@ import ReactMarkdown from 'react-markdown';
 import { Alert, Button, Col, Container, Form, ListGroup, Row, Spinner } from 'react-bootstrap';
 
 import * as api from '../api/types';
-import { fetchQuestion, showQuestion, leavingQuestion, postAnswer } from '../slices/questionSlice';
+import { fetchQuestion, showQuestion, leavingQuestion, postAnswer, voteAnswer } from '../slices/questionSlice';
+import { showLoginModal } from '../slices/userSlice';
 import { RootState } from '../slices';
 
 import InlineLoginPrompt from './InlineLoginPrompt';
 
-function AnswerItem({ answer }: { answer: api.Answer }) {
+const CARET_SIZE = '1.5em';
+
+function CaretUp({ filled, onClick }: { filled: boolean, onClick: () => void }) {
+    return (
+        <button type="button" className="btn" onClick={onClick} style={{ padding: 0 }}>
+            {
+                filled
+                    ? (
+                        <svg className="bi bi-caret-up-fill" width={CARET_SIZE} height={CARET_SIZE} viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 00.753-1.659l-4.796-5.48a1 1 0 00-1.506 0z" />
+                        </svg>
+                    )
+                    : (
+                        <svg className="bi bi-caret-up" width={CARET_SIZE} height={CARET_SIZE} viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 011.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 01-.753-1.659z" clipRule="evenodd" />
+                        </svg>
+                    )
+            }
+        </button>
+    );
+}
+
+function CaretDown({ filled, onClick }: { filled: boolean, onClick: () => void }) {
+    return (
+        <button type="button" className="btn" onClick={onClick} style={{ padding: 0 }}>
+            {
+                filled
+                    ? (
+                        <svg className="bi bi-caret-down-fill" width={CARET_SIZE} height={CARET_SIZE} viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 01.753 1.659l-4.796 5.48a1 1 0 01-1.506 0z" />
+                        </svg>
+                    )
+                    : (
+                        <svg className="bi bi-caret-down" width={CARET_SIZE} height={CARET_SIZE} viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 001.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 00-.753 1.659z" clipRule="evenodd" />
+                        </svg>
+                    )
+            }
+        </button>
+    );
+}
+
+function AnswerItem({ answer, questionId }: { answer: api.Answer, questionId: string }) {
+    const dispatch = useDispatch();
+    const loggedIn = useSelector((state: RootState) => state.user.user) !== null;
+
     const created = new Date(answer.created).toLocaleString(undefined, {
         year: 'numeric',
         month: 'short',
@@ -20,10 +66,44 @@ function AnswerItem({ answer }: { answer: api.Answer }) {
         minute: 'numeric'
     });
 
+    function onClickUp() {
+        if (!loggedIn) {
+            dispatch(showLoginModal());
+            return;
+        }
+        if (answer.voteDirection !== 1) {
+            dispatch(voteAnswer({ questionId, answerId: answer.id, direction: 1 }));
+        } else {
+            dispatch(voteAnswer({ questionId, answerId: answer.id, direction: null }));
+        }
+    }
+    function onClickDown() {
+        if (!loggedIn) {
+            dispatch(showLoginModal());
+            return;
+        }
+        if (answer.voteDirection !== -1) {
+            dispatch(voteAnswer({ questionId, answerId: answer.id, direction: -1 }));
+        } else {
+            dispatch(voteAnswer({ questionId, answerId: answer.id, direction: null }));
+        }
+    }
+
     return (
         <ListGroup.Item>
-            <ReactMarkdown source={answer.body} />
-            <small style={{ float: 'right' }}>{`answered ${created} by ${answer.author}`}</small>
+            <Row>
+                <Col xs={2} md={1} style={{ display: 'flex', flexDirection: 'column', textAlign: 'center', padding: 0 }}>
+                    <CaretUp filled={answer.voteDirection === 1} onClick={onClickUp} />
+                    <span>{answer.votes}</span>
+                    <CaretDown filled={answer.voteDirection === -1} onClick={onClickDown} />
+                </Col>
+                <Col>
+                    <ReactMarkdown source={answer.body} />
+                </Col>
+            </Row>
+            <Row style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+                <small>{`answered ${created} by ${answer.author}`}</small>
+            </Row>
         </ListGroup.Item>
     );
 }
@@ -115,7 +195,7 @@ export default function Question() {
         return () => {
             dispatch(leavingQuestion());
         };
-    }, []);
+    }, [loggedIn]);
 
     let questionDetails = null;
     if (!loading && question !== null) {
@@ -149,7 +229,15 @@ export default function Question() {
                         <Col>
                             <h4>{`${question.answers.length} answer${question.answers.length > 1 ? 's' : ''}`}</h4>
                             <ListGroup variant="flush">
-                                {question.answers.map(a => <AnswerItem key={a.id} answer={a} />)}
+                                {question.answers.map(
+                                    a => (
+                                        <AnswerItem
+                                            key={a.id}
+                                            answer={a}
+                                            questionId={question.id}
+                                        />
+                                    )
+                                )}
                             </ListGroup>
                         </Col>
                     </Row>
