@@ -40,8 +40,10 @@ router.get('/:id', async (req, res) => {
             return;
         }
 
+        const token = getDecodedToken(req, res, false);
+
         const { rows: questionAnswers } = await client.query(
-            `SELECT answers.id, users.username as author, body, created, COALESCE(votes, 0) AS votes
+            `SELECT answers.id, users.username as author, body, created, COALESCE(votes, 0) AS votes, direction as vote_direction
             FROM answers
             LEFT JOIN users ON users.id=answers.author_id
             LEFT JOIN (
@@ -49,16 +51,23 @@ router.get('/:id', async (req, res) => {
                 FROM answer_votes
                 GROUP BY answer_id
             ) AS votes ON answers.id=votes.answer_id
+            LEFT JOIN answer_votes ON answer_votes.answer_id=answers.id AND answer_votes.user_id=$2
             WHERE question_id = $1
             ORDER BY created DESC`,
-            [req.params.id]
+            [req.params.id, token?.id]
         );
         const jsonResponse: api.Question = {
             ...questionResult.rows[0],
-            answers: questionAnswers.map(a => ({
-                ...a,
-                votes: Number(a.votes)
-            }))
+            answers: questionAnswers
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                .map(({ id, author, body, created, votes, vote_direction }) => ({
+                    id,
+                    author,
+                    body,
+                    created,
+                    votes: Number(votes),
+                    voteDirection: vote_direction,
+                }))
         };
         res.json(jsonResponse);
     } finally {
@@ -161,6 +170,83 @@ router.post('/:id/answers', async (req, res) => {
             votes: 0,
         };
         res.json(jsonResponse);
+    } finally {
+        client.release();
+    }
+});
+
+router.post('/:questionId/answers/:answerId/vote', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        if (!isUuid(req.params.questionId) || !isUuid(req.params.answerId)) {
+            res.status(404).json({ error: 'not found' });
+            return;
+        }
+        const { rows: [{ count }] } = await client.query(
+            'SELECT COUNT(*) FROM answers WHERE id = $1 AND question_id = $2',
+            [req.params.answerId, req.params.questionId]
+        );
+        if (Number(count) === 0) {
+            res.status(404).json({ error: 'not found' });
+            return;
+        }
+
+        if (req.body === undefined) {
+            res.status(400).json({ error: 'invalid request' });
+            return;
+        }
+
+        const { direction } = req.body;
+        if (direction !== 1 && direction !== -1) {
+            res.status(400).json({ error: 'invalid request' });
+            return;
+        }
+
+        const token = getDecodedToken(req, res);
+        if (token === null) {
+            return;
+        }
+
+        client.query(
+            `INSERT INTO answer_votes(answer_id, user_id, direction)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (answer_id, user_id) DO UPDATE SET direction=$3`,
+            [req.params.answerId, token.id, direction]
+        );
+
+        res.status(200).end();
+    } finally {
+        client.release();
+    }
+});
+
+router.delete('/:questionId/answers/:answerId/vote', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        if (!isUuid(req.params.questionId) || !isUuid(req.params.answerId)) {
+            res.status(404).json({ error: 'not found' });
+            return;
+        }
+        const { rows: [{ count }] } = await client.query(
+            'SELECT COUNT(*) FROM answers WHERE id = $1 AND question_id = $2',
+            [req.params.answerId, req.params.questionId]
+        );
+        if (Number(count) === 0) {
+            res.status(404).json({ error: 'not found' });
+            return;
+        }
+
+        const token = getDecodedToken(req, res);
+        if (token === null) {
+            return;
+        }
+
+        client.query(
+            'DELETE FROM answer_votes WHERE answer_id = $1 AND user_id = $2',
+            [req.params.answerId, token.id]
+        );
+
+        res.status(200).end();
     } finally {
         client.release();
     }

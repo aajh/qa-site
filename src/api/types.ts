@@ -17,6 +17,7 @@ export interface Answer {
     body: string
     created: string
     votes: number
+    voteDirection: 1 | -1 | null
 }
 
 export interface Question {

@@ -14,7 +14,11 @@ export const pool = new pg.Pool({
     connectionString: process.env[connectionVariables[process.env.NODE_ENV ?? 'development']]
 });
 
-export function getDecodedToken(req: express.Request, res: express.Response): JWTPayload | null {
+export function getDecodedToken(
+    req: express.Request,
+    res: express.Response,
+    sendErrorOnInvalid = true
+): JWTPayload | null {
     const authorization = req.get('authorization');
     const token = authorization && authorization.toLowerCase().startsWith('bearer ')
         ? authorization.substring(7)
@@ -31,7 +35,10 @@ export function getDecodedToken(req: express.Request, res: express.Response): JW
     }
 
     if (token === null || decodedToken === null || !decodedToken.id) {
-        res.status(401).json({ error: 'token missing or invalid' });
+        if (sendErrorOnInvalid) {
+            res.status(401).json({ error: 'token missing or invalid' });
+        }
+        return null;
     }
 
     return decodedToken;
