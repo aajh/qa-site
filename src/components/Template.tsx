@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Container, Navbar, Nav } from 'react-bootstrap';
+import { Button, Container, Form, Navbar, Nav } from 'react-bootstrap';
 
 import { RootState } from '../slices';
 import { logout, showLoginModal, showRegistrationModal } from '../slices/userSlice';
@@ -36,15 +36,16 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
     return (
         <div>
-            <Navbar variant="dark" bg="dark">
+            <Navbar expand="md" variant="dark" bg="dark">
                 <Container>
                     <Link to="/" onClick={onHomeClick} className="navbar-brand">QA</Link>
-                    <Navbar.Collapse>
+                    <Navbar.Toggle aria-controls="navbar-nav" />
+                    <Navbar.Collapse id="navbar-nav">
                         <Nav className="mr-auto">
                             <NavLink exact to="/" onClick={onHomeClick} className="nav-item nav-link">Home</NavLink>
                             <NavLink to="/questions/ask" className="nav-item nav-link">Ask</NavLink>
                         </Nav>
-                        <Nav>
+                        <Form inline>
                             {user !== null && (
                                 <Navbar.Text className="mr-3">{`Logged in as ${user.username}`}</Navbar.Text>
                             )}
@@ -54,7 +55,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
                             {user === null && (
                                 <Button onClick={onShowRegistrationModal}>Register</Button>
                             )}
-                        </Nav>
+                        </Form>
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
