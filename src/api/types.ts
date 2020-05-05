@@ -16,6 +16,7 @@ export interface Answer {
     author: string
     body: string
     created: string
+    votes: number
 }
 
 export interface Question {

@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     const { rows: jsonResponse } = await pool.query<api.QuestionSummary>(
         `SELECT questions.id, username as author, title, created
         FROM questions
-        INNER JOIN users ON users.id=questions.authorId
+        LEFT JOIN users ON users.id=questions.authorId
         ORDER BY created DESC`
     );
     res.json(jsonResponse);
@@ -31,7 +31,7 @@ router.get('/:id', async (req, res) => {
         const questionResult = await client.query(
             `SELECT questions.id, username as author, title, body, created
             FROM questions
-            INNER JOIN users ON users.id=questions.authorId
+            LEFT JOIN users ON users.id=questions.authorId
             WHERE questions.id = $1`,
             [req.params.id]
         );
@@ -41,16 +41,24 @@ router.get('/:id', async (req, res) => {
         }
 
         const { rows: questionAnswers } = await client.query(
-            `SELECT answers.id, users.username as author, body, created
+            `SELECT answers.id, users.username as author, body, created, COALESCE(votes, 0) AS votes
             FROM answers
-            INNER JOIN users on users.id=answers.authorId
+            LEFT JOIN users ON users.id=answers.authorId
+            LEFT JOIN (
+                SELECT answer_votes.answer_id, SUM(answer_votes.direction) AS votes
+                FROM answer_votes
+                GROUP BY answer_votes.answer_id
+            ) AS votes ON answers.id=votes.answer_id
             WHERE questionId = $1
             ORDER BY created DESC`,
             [req.params.id]
         );
         const jsonResponse: api.Question = {
             ...questionResult.rows[0],
-            answers: questionAnswers
+            answers: questionAnswers.map(a => ({
+                ...a,
+                votes: Number(a.votes)
+            }))
         };
         res.json(jsonResponse);
     } finally {
@@ -149,7 +157,8 @@ router.post('/:id/answers', async (req, res) => {
 
         const jsonResponse: api.Answer = {
             ...answer,
-            author: username
+            author: username,
+            votes: 0,
         };
         res.json(jsonResponse);
     } finally {

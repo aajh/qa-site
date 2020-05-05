@@ -14,4 +14,9 @@ BEGIN;
     ('1dc42217-5ef3-40bc-ad66-fd45377359bb', '9eae28b9-a77b-4f39-901d-140e2d4a710c', '46669625-b447-46ce-afc7-c762a9923e0a', 'Just do something else.', '2020-04-21T18:01:00Z'),
     ('df39ad99-64e1-4f9f-8d61-c3b95802dbf8', '9eae28b9-a77b-4f39-901d-140e2d4a710c', '158deb7d-bebb-47c3-80d2-eded1bcc0d61', 'Do this instead.', '2020-04-22T10:16:00Z'),
     ('9c733630-35c6-40d3-8355-0ac42e3d009a', '13ebf57d-4d1d-49db-aa38-301767778c81', '158deb7d-bebb-47c3-80d2-eded1bcc0d61', 'You can''t do it, kid.', '2020-04-22T10:20:00Z');
+
+    INSERT INTO answer_votes(answer_id, user_id, direction) VALUES
+    ('df39ad99-64e1-4f9f-8d61-c3b95802dbf8', '7c73b441-3ca3-47b4-b4fb-a6c7bb91d780', 1),
+    ('df39ad99-64e1-4f9f-8d61-c3b95802dbf8', '46669625-b447-46ce-afc7-c762a9923e0a', 1),
+    ('df39ad99-64e1-4f9f-8d61-c3b95802dbf8', 'e27fa8bf-3e9d-4eb7-bb25-2443a3ab554d', -1);
 COMMIT;
