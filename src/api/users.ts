@@ -37,7 +37,7 @@ router.post('/users', async (req, res) => {
         const id = uuidv4();
 
         await client.query(
-            'INSERT INTO users(id, username, passwordHash) VALUES ($1, $2, $3)',
+            'INSERT INTO users(id, username, password_hash) VALUES ($1, $2, $3)',
             [id, username, passwordHash]
         );
 
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
     }
 
     const { rows } = await pool.query(
-        'SELECT id, passwordHash FROM users WHERE username = $1',
+        'SELECT id, password_hash FROM users WHERE username = $1',
         [username]
     );
 
@@ -76,7 +76,7 @@ router.post('/login', async (req, res) => {
         return;
     }
 
-    const { id, passwordhash: passwordHash } = rows[0];
+    const { id, password_hash: passwordHash } = rows[0];
     const passwordCorrect = await bcrypt.compare(password, passwordHash);
     if (!passwordCorrect) {
         res.status(401).json({ error: 'invalid username or password' });

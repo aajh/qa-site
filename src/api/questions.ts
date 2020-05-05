@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     const { rows: jsonResponse } = await pool.query<api.QuestionSummary>(
         `SELECT questions.id, username as author, title, created
         FROM questions
-        LEFT JOIN users ON users.id=questions.authorId
+        LEFT JOIN users ON users.id=questions.author_id
         ORDER BY created DESC`
     );
     res.json(jsonResponse);
@@ -31,7 +31,7 @@ router.get('/:id', async (req, res) => {
         const questionResult = await client.query(
             `SELECT questions.id, username as author, title, body, created
             FROM questions
-            LEFT JOIN users ON users.id=questions.authorId
+            LEFT JOIN users ON users.id=questions.author_id
             WHERE questions.id = $1`,
             [req.params.id]
         );
@@ -43,13 +43,13 @@ router.get('/:id', async (req, res) => {
         const { rows: questionAnswers } = await client.query(
             `SELECT answers.id, users.username as author, body, created, COALESCE(votes, 0) AS votes
             FROM answers
-            LEFT JOIN users ON users.id=answers.authorId
+            LEFT JOIN users ON users.id=answers.author_id
             LEFT JOIN (
-                SELECT answer_votes.answer_id, SUM(answer_votes.direction) AS votes
+                SELECT answer_id, SUM(direction) AS votes
                 FROM answer_votes
-                GROUP BY answer_votes.answer_id
+                GROUP BY answer_id
             ) AS votes ON answers.id=votes.answer_id
-            WHERE questionId = $1
+            WHERE question_id = $1
             ORDER BY created DESC`,
             [req.params.id]
         );
@@ -89,7 +89,7 @@ router.post('/', async (req, res) => {
         }
 
         const { rows } = await client.query(
-            `INSERT INTO questions(id, authorId, title, body, created)
+            `INSERT INTO questions(id, author_id, title, body, created)
             VALUES ($1, $2, $3, $4, NOW())
             RETURNING id, title, body, created`,
             [uuidv4(), token.id, title, body]
@@ -144,7 +144,7 @@ router.post('/:id/answers', async (req, res) => {
         }
 
         const { rows: [answer] } = await client.query(
-            `INSERT INTO answers(id, questionId, authorId, body, created)
+            `INSERT INTO answers(id, question_id, author_id, body, created)
             VALUES ($1, $2, $3, $4, NOW())
             RETURNING id, body, created`,
             [uuidv4(), req.params.id, token.id, body]
