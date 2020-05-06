@@ -24,8 +24,8 @@ export default function RegistrationModal() {
     const usernameEl: React.MutableRefObject<HTMLInputElement | null> = useRef(null);
 
     useEffect(() => {
-        if (usernameInUse && usernameEl?.current) {
-            usernameEl.current.focus();
+        if (usernameInUse) {
+            usernameEl?.current?.focus?.();
         }
     }, [usernameInUse, usernameEl]);
 

@@ -16,7 +16,7 @@ const CARET_SIZE = '1.5em';
 
 function CaretUp({ filled, onClick }: { filled: boolean, onClick: () => void }) {
     return (
-        <button type="button" className="btn" onClick={onClick} style={{ padding: 0 }}>
+        <button type="button" className="vote-up btn" onClick={onClick} style={{ padding: 0 }}>
             {
                 filled
                     ? (
@@ -36,7 +36,7 @@ function CaretUp({ filled, onClick }: { filled: boolean, onClick: () => void }) 
 
 function CaretDown({ filled, onClick }: { filled: boolean, onClick: () => void }) {
     return (
-        <button type="button" className="btn" onClick={onClick} style={{ padding: 0 }}>
+        <button type="button" className="vote-down btn" onClick={onClick} style={{ padding: 0 }}>
             {
                 filled
                     ? (

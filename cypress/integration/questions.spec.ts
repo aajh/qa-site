@@ -11,10 +11,8 @@ describe('Questions', () => {
         const body = 'I have an error 500 on my example.com/robots.txt page.';
         const comment = 'Just do something else.';
 
-        cy.get('.list-group > .list-group-item').as('item');
-        cy.get('@item').should('contain', title);
+        cy.get('.list-group').contains(title).parents('.list-group-item').as('item');
         cy.get('@item').should('contain', poster);
-
         cy.get('@item').contains(title).click();
 
         cy.get('h2').should('contain', title);
@@ -53,6 +51,36 @@ describe('Questions', () => {
             cy.get('form button[type=submit]').click();
 
             cy.get('p').should('contain', answer);
+        });
+    });
+
+    describe('voting buttons', () => {
+        const title = 'favicon.ico 500 error when fetching robots.txt';
+
+        it('shows login modal when logged out', () => {
+            cy.contains(title).click();
+            cy.get('.list-group-item .vote-up').first().click();
+            cy.get('.modal-header').should('contain', 'Login');
+        });
+
+        it('should vote and remove vote when logged in', () => {
+            const comment = 'Just do something else.';
+
+            cy.login({ username: 'Kevin', password: 'password' });
+            cy.contains(title).click();
+            cy.contains(comment).parents('.list-group-item').as('comment');
+
+            cy.get('@comment').find('span').should('contain', 0);
+            cy.get('@comment').find('.vote-up').click();
+            cy.get('@comment').find('span').should('contain', 1);
+            cy.reload();
+            cy.get('@comment').find('span').should('contain', 1);
+
+            cy.get('@comment').find('.vote-down').click();
+            cy.get('@comment').find('span').should('contain', -1);
+
+            cy.get('@comment').find('.vote-down').click();
+            cy.get('@comment').find('span').should('contain', 0);
         });
     });
 });
