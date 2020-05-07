@@ -1,3 +1,6 @@
 BEGIN;
-    TRUNCATE users CASCADE;
+
+TRUNCATE users CASCADE;
+TRUNCATE "session";
+
 COMMIT;

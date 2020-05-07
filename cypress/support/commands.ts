@@ -1,4 +1,4 @@
-import * as api from '../../src/api/types';
+export {}; // Fixes typescript error for declare global
 
 declare global {
     namespace Cypress {
@@ -12,18 +12,14 @@ declare global {
 
 function login(info: { username: string, password: string }): void {
     cy.request('POST', '/api/login', info)
-        .then(({ body: { token } }: { body: api.Login}) => {
-            localStorage.setItem('token', token);
-            cy.reload();
-        });
+        .then(() => cy.reload());
 }
 Cypress.Commands.add('login', login);
 
 function register(info: { username: string, password: string }, shouldLogin = false): void {
     cy.request('POST', '/api/users', info)
-        .then(({ body: { token } }: { body: api.Login}) => {
+        .then(() => {
             if (shouldLogin) {
-                localStorage.setItem('token', token);
                 cy.reload();
             }
         });
@@ -31,14 +27,10 @@ function register(info: { username: string, password: string }, shouldLogin = fa
 Cypress.Commands.add('register', register);
 
 function createQuestion(question: { title: string, body: string }): void {
-    const token = localStorage.getItem('token');
     cy.request({
         url: '/api/questions',
         method: 'POST',
         body: question,
-        headers: {
-            Authorization: `Bearer ${token}`
-        },
     });
     cy.get('nav').contains('Home').click();
 }
