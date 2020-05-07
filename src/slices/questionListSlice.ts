@@ -32,7 +32,7 @@ interface QuestionListState {
     error: boolean
 }
 
-const initialState: QuestionListState = {
+export const questionListInitialState: QuestionListState = {
     questionList: [],
     loading: true,
     error: false,
@@ -40,7 +40,7 @@ const initialState: QuestionListState = {
 
 const questionList = createSlice({
     name: 'questionList',
-    initialState,
+    initialState: questionListInitialState,
     reducers: {},
     extraReducers: builder => {
         builder.addCase(fetchQuestionList.pending, state => {

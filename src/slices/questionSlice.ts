@@ -187,7 +187,7 @@ interface QuestionState {
     postingAnswerError: boolean
 }
 
-const questionInitialState: QuestionState = {
+export const questionInitialState: QuestionState = {
     question: null,
     loading: true,
     loadingError: false,

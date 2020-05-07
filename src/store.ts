@@ -7,10 +7,14 @@ import createRootReducer, { RootState } from './slices';
 
 export const history = createBrowserHistory();
 
+// eslint-disable-next-line no-underscore-dangle
+const preloadedState = (window as any).__PRELOADED_STATE__;
+
 const store = configureStore({
     reducer: createRootReducer(history),
     middleware: [...getDefaultMiddleware(), routerMiddleware(history)] as const,
-    devTools: process.env.NODE_ENV !== 'production'
+    devTools: process.env.NODE_ENV !== 'production',
+    preloadedState
 });
 
 export type AppDispatch = typeof store.dispatch;

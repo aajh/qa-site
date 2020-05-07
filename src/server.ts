@@ -12,6 +12,7 @@ dotenv.config();
 
 import api from './api';
 import { pool } from './api/common';
+import renderPage from './api/page';
 
 const app = express();
 
@@ -31,7 +32,13 @@ app.use(session({
 
 app.use('/api', api);
 app.use(express.static('dist/static'));
-app.use(connectHistoryApiFallback());
+app.use(connectHistoryApiFallback({
+    index: '/',
+}));
+app.get('/', async (req, res) => {
+    const page = await renderPage(req);
+    res.send(page);
+});
 
 if (process.env.NODE_ENV !== 'production') {
     const webpack = require('webpack');
