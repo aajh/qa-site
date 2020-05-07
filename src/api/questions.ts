@@ -2,7 +2,7 @@ import Router from 'express-promise-router';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as api from './types';
-import { pool, getDecodedToken } from './common';
+import { pool, getUserId } from './common';
 
 const router = Router();
 
@@ -40,7 +40,7 @@ router.get('/:id', async (req, res) => {
             return;
         }
 
-        const token = getDecodedToken(req, res, false);
+        const userId = getUserId(req, res, false);
 
         const { rows: questionAnswers } = await client.query(
             `SELECT answers.id, users.username as author, body, created, COALESCE(votes, 0) AS votes, answer_votes.direction AS vote_direction
@@ -54,7 +54,7 @@ router.get('/:id', async (req, res) => {
             LEFT JOIN answer_votes ON (answer_votes.answer_id=answers.id AND answer_votes.user_id=$2)
             WHERE question_id = $1
             ORDER BY created DESC`,
-            [req.params.id, token?.id]
+            [req.params.id, userId]
         );
         const jsonResponse: api.Question = {
             ...questionResult.rows[0],
@@ -92,8 +92,8 @@ router.post('/', async (req, res) => {
             return;
         }
 
-        const token = getDecodedToken(req, res);
-        if (token === null) {
+        const userId = getUserId(req, res);
+        if (userId === null) {
             return;
         }
 
@@ -101,12 +101,12 @@ router.post('/', async (req, res) => {
             `INSERT INTO questions(id, author_id, title, body, created)
             VALUES ($1, $2, $3, $4, NOW())
             RETURNING id, title, body, created`,
-            [uuidv4(), token.id, title, body]
+            [uuidv4(), userId, title, body]
         );
 
         const { rows: [{ username }] } = await client.query(
             'SELECT username FROM users WHERE id = $1',
-            [token.id]
+            [userId]
         );
 
         const jsonResponse: api.Question = {
@@ -147,8 +147,8 @@ router.post('/:id/answers', async (req, res) => {
             return;
         }
 
-        const token = getDecodedToken(req, res);
-        if (token === null) {
+        const userId = getUserId(req, res);
+        if (userId === null) {
             return;
         }
 
@@ -156,12 +156,12 @@ router.post('/:id/answers', async (req, res) => {
             `INSERT INTO answers(id, question_id, author_id, body, created)
             VALUES ($1, $2, $3, $4, NOW())
             RETURNING id, body, created`,
-            [uuidv4(), req.params.id, token.id, body]
+            [uuidv4(), req.params.id, userId, body]
         );
 
         const { rows: [{ username }] } = await client.query(
             'SELECT username FROM users WHERE id = $1',
-            [token.id]
+            [userId]
         );
 
         const jsonResponse: api.Answer = {
@@ -202,8 +202,8 @@ router.post('/:questionId/answers/:answerId/vote', async (req, res) => {
             return;
         }
 
-        const token = getDecodedToken(req, res);
-        if (token === null) {
+        const userId = getUserId(req, res);
+        if (userId === null) {
             return;
         }
 
@@ -212,12 +212,12 @@ router.post('/:questionId/answers/:answerId/vote', async (req, res) => {
                 `INSERT INTO answer_votes(answer_id, user_id, direction)
                 VALUES ($1, $2, $3)
                 ON CONFLICT (answer_id, user_id) DO UPDATE SET direction=$3`,
-                [req.params.answerId, token.id, direction]
+                [req.params.answerId, userId, direction]
             );
         } else {
             client.query(
                 'DELETE FROM answer_votes WHERE answer_id = $1 AND user_id = $2',
-                [req.params.answerId, token.id]
+                [req.params.answerId, userId]
             );
         }
 

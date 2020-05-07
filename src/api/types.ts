@@ -2,13 +2,9 @@ export interface Login {
     token: string
 }
 
-export interface JWTPayload {
+export interface User {
     id: string
     username: string
-    iat: number
-}
-export function checkTokenIsValid(p: JWTPayload) {
-    return typeof p.id === 'string' && typeof p.username === 'string' && typeof p.iat === 'number';
 }
 
 export interface Answer {

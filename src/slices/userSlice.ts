@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import jwt from 'jsonwebtoken';
 
 import * as api from '../api/types';
 
@@ -8,7 +7,7 @@ enum LoginError {
     WrongUsernameOrPassword,
 }
 export const login = createAsyncThunk<
-string,
+api.User,
 {
     username: string
     password: string
@@ -26,8 +25,8 @@ string,
                 body: JSON.stringify(loginInformation),
             });
             if (response.ok) {
-                const { token }: api.Login = await response.json();
-                return token;
+                const user: api.User = await response.json();
+                return user;
             } else {
                 return rejectWithValue(
                     response.status === 401
@@ -46,7 +45,7 @@ enum RegistrationError {
     UsernameInUse,
 }
 export const register = createAsyncThunk<
-string,
+api.User,
 {
     username: string
     password: string
@@ -64,8 +63,8 @@ string,
                 body: JSON.stringify(registrationInformation),
             });
             if (response.ok) {
-                const { token }: api.Login = await response.json();
-                return token;
+                const user: api.User = await response.json();
+                return user;
             } else {
                 return rejectWithValue(
                     response.status === 403
@@ -79,10 +78,26 @@ string,
     }
 );
 
+export const logout = createAsyncThunk<
+void,
+void,
+{}
+>(
+    'user/logout',
+    async () => {
+        try {
+            await fetch('/api/logout', {
+                method: 'POST'
+            });
+        } catch (error) {
+            // Ignore errors
+        }
+    }
+);
+
 
 export interface UserState {
-    token: string | null
-    user: api.JWTPayload | null
+    user: api.User | null
 
     showLoginModal: boolean
     loggingIn: boolean
@@ -96,7 +111,6 @@ export interface UserState {
 }
 
 export const userInitialState: UserState = {
-    token: null,
     user: null,
 
     showLoginModal: false,
@@ -110,13 +124,10 @@ export const userInitialState: UserState = {
     usernameInUse: false,
 };
 
-const user = createSlice({
+const userSlice = createSlice({
     name: 'user',
     initialState: userInitialState,
     reducers: {
-        logout() {
-            return userInitialState;
-        },
         showLoginModal(state) {
             return {
                 ...state,
@@ -147,10 +158,9 @@ const user = createSlice({
             state.loginError = false;
             state.wrongUsernameOrPassword = false;
         });
-        builder.addCase(login.fulfilled, (_, { payload: token }) => ({
+        builder.addCase(login.fulfilled, (_, { payload: user }) => ({
             ...userInitialState,
-            token,
-            user: jwt.decode(token) as api.JWTPayload,
+            user,
         }));
         builder.addCase(login.rejected, (state, { payload }) => {
             state.loggingIn = false;
@@ -163,25 +173,25 @@ const user = createSlice({
             state.registrationError = false;
             state.usernameInUse = false;
         });
-        builder.addCase(register.fulfilled, (_, { payload: token }) => ({
+        builder.addCase(register.fulfilled, (_, { payload: user }) => ({
             ...userInitialState,
-            token,
-            user: jwt.decode(token) as api.JWTPayload,
+            user,
         }));
         builder.addCase(register.rejected, (state, { payload }) => {
             state.registering = false;
             state.registrationError = payload === RegistrationError.Error;
             state.usernameInUse = payload === RegistrationError.UsernameInUse;
         });
+
+        builder.addCase(logout.fulfilled, () => userInitialState);
     }
 });
 
 export const {
-    logout,
     showLoginModal,
     closeLoginModal,
     showRegistrationModal,
     closeRegistrationModal,
-} = user.actions;
+} = userSlice.actions;
 
-export default user.reducer;
+export default userSlice.reducer;

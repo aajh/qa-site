@@ -13,19 +13,15 @@ api.Question,
 },
 {
     dispatch: AppDispatch
-    state: RootState
     rejectValue: void
 }
 >(
     'question/fetch',
-    async ({ id, redirectOn404 = true }, { dispatch, getState, rejectWithValue }) => {
+    async ({ id, redirectOn404 = true }, { dispatch, rejectWithValue }) => {
         try {
-            const { user: { token } } = getState();
-
             const response = await fetch(`/api/questions/${id}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: token !== null ? `Bearer ${token}` : '',
                 },
             });
             if (response.status === 404 && redirectOn404) {
@@ -58,9 +54,9 @@ api.Question,
     'question/postQuestion',
     async (question, { dispatch, getState, rejectWithValue }) => {
         try {
-            const { user: { token } } = getState();
+            const { user: { user } } = getState();
 
-            if (token === null) {
+            if (user === null) {
                 return rejectWithValue();
             }
 
@@ -68,7 +64,6 @@ api.Question,
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(question)
             });
@@ -108,9 +103,9 @@ export const postAnswer = createAsyncThunk<
     'question/postAnswer',
     async ({ answer, questionId }, { getState, rejectWithValue }) => {
         try {
-            const { user: { token } } = getState();
+            const { user: { user } } = getState();
 
-            if (token === null) {
+            if (user === null) {
                 return rejectWithValue();
             }
 
@@ -118,7 +113,6 @@ export const postAnswer = createAsyncThunk<
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(answer)
             });
@@ -154,13 +148,16 @@ export const voteAnswer = createAsyncThunk<
     'question/voteAnswer',
     async ({ questionId, answerId, direction }, { getState, rejectWithValue }) => {
         try {
-            const { user: { token } } = getState();
+            const { user: { user } } = getState();
+
+            if (user === null) {
+                return rejectWithValue();
+            }
 
             const response = await fetch(`/api/questions/${questionId}/answers/${answerId}/vote`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ direction })
             });

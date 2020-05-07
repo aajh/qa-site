@@ -1,10 +1,9 @@
 import Router from 'express-promise-router';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
 import { pool } from './common';
-import { JWTPayload } from './types';
+import { User } from './types';
 
 const router = Router();
 
@@ -41,14 +40,13 @@ router.post('/users', async (req, res) => {
             [id, username, passwordHash]
         );
 
-        const userForToken: JWTPayload = {
+        req.session!.userId = id;
+
+        const user: User = {
             id,
             username,
-            iat: 0,
         };
-
-        const token = jwt.sign(userForToken, process.env.JWT_SECRET as string);
-        res.json({ token });
+        res.json(user);
     } finally {
         client.release();
     }
@@ -83,14 +81,23 @@ router.post('/login', async (req, res) => {
         return;
     }
 
-    const userForToken: JWTPayload = {
+    req.session!.userId = id;
+
+    const user: User = {
         id,
         username,
-        iat: 0,
     };
+    res.json(user);
+});
 
-    const token = jwt.sign(userForToken, process.env.JWT_SECRET as string);
-    res.json({ token });
+router.post('/logout', async (req, res, next) => {
+    req.session!.destroy(err => {
+        if (err) {
+            next(err);
+        } else {
+            res.status(200).end();
+        }
+    });
 });
 
 export default router;
