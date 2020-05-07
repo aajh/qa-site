@@ -1,34 +1,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-    Switch,
-    Route,
-} from 'react-router-dom';
+
 import { ConnectedRouter } from 'connected-react-router';
 import { Provider } from 'react-redux';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './main.css';
 
-import store, { history } from './store';
+import createStoreAndHistory from './store';
+import App from './components/App';
 
-import Template from './components/Template';
-import NotFound from './components/NotFound';
-import Ask from './components/Ask';
-import Question from './components/Question';
-import QuestionList from './components/QuestionList';
 
-ReactDOM.render(
+// eslint-disable-next-line no-underscore-dangle
+const preloadedState = (window as any).__PRELOADED_STATE__;
+// eslint-disable-next-line no-underscore-dangle
+delete (window as any).__PRELOADED_STATE__;
+
+const { store, history } = createStoreAndHistory(preloadedState);
+
+ReactDOM.hydrate(
     <Provider store={store}>
         <ConnectedRouter history={history}>
-            <Template>
-                <Switch>
-                    <Route path="/questions/ask" component={Ask} />
-                    <Route path="/questions/:id" component={Question} />
-                    <Route exact path="/" component={QuestionList} />
-                    <Route path="*" component={NotFound} />
-                </Switch>
-            </Template>
+            <App />
         </ConnectedRouter>
     </Provider>,
     document.getElementById('react-container')

@@ -1,8 +1,14 @@
 import express from 'express';
 import serialize from 'serialize-javascript';
 import _ from 'lodash';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { Provider } from 'react-redux';
+import { StaticRouter } from 'react-router';
 
 import { initialState } from '../slices';
+import createStoreAndHistory from '../store';
+import App from '../components/App';
 import { pool } from './common';
 
 
@@ -23,6 +29,16 @@ export default async function renderPage(req: express.Request): Promise<string> 
         }
     }
 
+    const { store } = createStoreAndHistory(state, req.url);
+
+    const reactHtml = renderToString(
+        <Provider store={store}>
+            <StaticRouter location={req.url}>
+                <App />
+            </StaticRouter>
+        </Provider>
+    );
+
     return `
 <!DOCTYPE html>
 <html>
@@ -34,7 +50,7 @@ export default async function renderPage(req: express.Request): Promise<string> 
         <link href="/main.css" rel="stylesheet">
     </head>
     <body>
-        <div id="react-container"></div>
+        <div id="react-container">${reactHtml}</div>
         <script>
             window.__PRELOADED_STATE__ = ${serialize(state)}
         </script>

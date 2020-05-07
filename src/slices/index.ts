@@ -13,11 +13,12 @@ const createRootReducer = (history: History) => combineReducers({
     question: questionsReducer
 });
 
-export const initialState = {
+export type RootState = ReturnType<ReturnType<typeof createRootReducer>>;
+export const initialState: RootState = {
+    router: undefined,
     user: userInitialState,
     questionList: questionListInitialState,
     question: questionInitialState,
-};
+} as any;
 
-export type RootState = ReturnType<ReturnType<typeof createRootReducer>>;
 export default createRootReducer;

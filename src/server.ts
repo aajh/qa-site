@@ -3,7 +3,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import express from 'express';
 import dotenv from 'dotenv';
-import connectHistoryApiFallback from 'connect-history-api-fallback';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 
@@ -32,13 +31,6 @@ app.use(session({
 
 app.use('/api', api);
 app.use(express.static('dist/static'));
-app.use(connectHistoryApiFallback({
-    index: '/',
-}));
-app.get('/', async (req, res) => {
-    const page = await renderPage(req);
-    res.send(page);
-});
 
 if (process.env.NODE_ENV !== 'production') {
     const webpack = require('webpack');
@@ -55,6 +47,11 @@ if (process.env.NODE_ENV !== 'production') {
 } else {
     app.set('trust proxy', 1);
 }
+
+app.get('*', async (req, res) => {
+    const page = await renderPage(req);
+    res.send(page);
+});
 
 app.use((err: any, req: any, res: any, next: any) => {
     // eslint-disable-next-line no-console
