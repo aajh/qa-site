@@ -1,7 +1,6 @@
 describe('Questions', () => {
     beforeEach(() => {
         cy.task('resetAndSeedDatabase');
-        cy.clearLocalStorage();
         cy.visit('/');
     });
 

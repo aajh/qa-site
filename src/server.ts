@@ -10,7 +10,7 @@ dotenv.config();
 
 import api from './api';
 import { pool } from './api/common';
-import renderPage from './api/page';
+import page from './api/page';
 
 const app = express();
 
@@ -47,10 +47,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.set('trust proxy', 1);
 }
 
-app.get('*', async (req, res) => {
-    const page = await renderPage(req);
-    res.send(page);
-});
+app.use('/', page);
 
 app.use((err: any, req: any, res: any, next: any) => {
     // eslint-disable-next-line no-console

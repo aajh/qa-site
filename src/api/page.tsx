@@ -1,23 +1,25 @@
 import express from 'express';
+import Router from 'express-promise-router';
 import serialize from 'serialize-javascript';
 import _ from 'lodash';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import { StaticRouter } from 'react-router';
+import pg from 'pg';
 
-import { initialState } from '../slices';
+import { initialState, RootState } from '../slices';
 import createStore from '../store';
 import App from '../components/App';
 import { pool } from './common';
+import { getQuestionList } from './questions';
 
-
-export default async function renderPage(req: express.Request): Promise<string> {
+async function getInitialState(req: express.Request, client: pg.ClientBase): Promise<RootState> {
     const state = _.cloneDeep(initialState);
 
     if (req.session?.userId) {
         const { userId } = req.session;
-        const { rows: [{ username }] } = await pool.query(
+        const { rows: [{ username }] } = await client.query(
             'SELECT username FROM users WHERE id = $1',
             [userId]
         );
@@ -29,6 +31,10 @@ export default async function renderPage(req: express.Request): Promise<string> 
         }
     }
 
+    return state;
+}
+
+async function renderPage(req: express.Request, state: RootState): Promise<string> {
     const store = createStore(state);
 
     const reactHtml = renderToString(
@@ -59,3 +65,33 @@ export default async function renderPage(req: express.Request): Promise<string> 
 </html>
     `;
 }
+
+const router = Router();
+
+router.get('/', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const state = await getInitialState(req, client);
+
+        state.questionList.questionList = await getQuestionList(client);
+        state.questionList.loading = false;
+
+        const page = await renderPage(req, state);
+        res.send(page);
+    } finally {
+        client.release();
+    }
+});
+
+router.get('/*', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const state = await getInitialState(req, client);
+        const page = await renderPage(req, state);
+        res.send(page);
+    } finally {
+        client.release();
+    }
+});
+
+export default router;

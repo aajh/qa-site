@@ -20,7 +20,7 @@ export function getUserId(
 
     if (!userId) {
         if (sendErrorOnInvalid) {
-            res.status(401).json({ error: 'token missing or invalid' });
+            res.status(401).json({ error: 'not logged in' });
         }
         return null;
     }

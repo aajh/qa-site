@@ -1,5 +1,6 @@
 import Router from 'express-promise-router';
 import { v4 as uuidv4 } from 'uuid';
+import pg from 'pg';
 
 import * as api from './types';
 import { pool, getUserId } from './common';
@@ -11,14 +12,24 @@ function isUuid(uuid: string) {
     return uuidRegex.test(uuid);
 }
 
-router.get('/', async (req, res) => {
-    const { rows: jsonResponse } = await pool.query<api.QuestionSummary>(
+export async function getQuestionList(client: pg.ClientBase): Promise<api.QuestionSummary[]> {
+    const { rows } = await client.query<api.QuestionSummary>(
         `SELECT questions.id, username as author, title, created
         FROM questions
         LEFT JOIN users ON users.id=questions.author_id
         ORDER BY created DESC`
     );
-    res.json(jsonResponse);
+    return rows;
+}
+
+router.get('/', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const jsonResponse = await getQuestionList(client);
+        res.json(jsonResponse);
+    } finally {
+        client.release();
+    }
 });
 
 router.get('/:id', async (req, res) => {
