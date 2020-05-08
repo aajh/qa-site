@@ -179,8 +179,8 @@ interface QuestionState {
     question: api.Question | null
     loading: boolean
     loadingError: boolean
+    showExistingQuestion: boolean
 
-    questionWasPosted: boolean
     postingQuestion: boolean
     postingQuestionError: boolean
 
@@ -192,7 +192,7 @@ export const questionInitialState: QuestionState = {
     question: null,
     loading: true,
     loadingError: false,
-    questionWasPosted: false,
+    showExistingQuestion: false,
     postingQuestion: false,
     postingQuestionError: false,
     postingAnswer: false,
@@ -205,7 +205,7 @@ const question = createSlice({
     reducers: {
         showQuestion(state, { payload }: PayloadAction<string>) {
             if (state.question?.id === payload) {
-                state.questionWasPosted = false;
+                state.showExistingQuestion = false;
             }
         },
         leavingQuestion(state) {
@@ -223,13 +223,13 @@ const question = createSlice({
         builder.addCase(fetchQuestion.fulfilled, (state, { payload }) => {
             state.question = payload;
             state.loading = false;
-            state.questionWasPosted = false;
+            state.showExistingQuestion = false;
             state.loadingError = false;
         });
         builder.addCase(fetchQuestion.rejected, state => {
             state.question = null;
             state.loading = false;
-            state.questionWasPosted = false;
+            state.showExistingQuestion = false;
             state.loadingError = true;
         });
 
@@ -241,7 +241,7 @@ const question = createSlice({
             state.question = payload;
             state.loading = false;
             state.loadingError = false;
-            state.questionWasPosted = true;
+            state.showExistingQuestion = true;
             state.postingQuestion = false;
             state.postingQuestionError = false;
         });

@@ -3,14 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import pg from 'pg';
 
 import * as api from './types';
-import { pool, getUserId } from './common';
+import { pool, getUserId, isUuid } from './common';
 
 const router = Router();
-
-const uuidRegex = /^[0-9A-F]{8}-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-function isUuid(uuid: string) {
-    return uuidRegex.test(uuid);
-}
 
 export async function getQuestionList(client: pg.ClientBase): Promise<api.QuestionSummary[]> {
     const { rows } = await client.query<api.QuestionSummary>(
@@ -32,55 +27,65 @@ router.get('/', async (req, res) => {
     }
 });
 
+export async function getQuestion(
+    client: pg.ClientBase,
+    questionId: string,
+    userId: string | null
+): Promise<api.Question | null> {
+    if (!isUuid(questionId)) {
+        return null;
+    }
+
+    const questionResult = await client.query(
+        `SELECT questions.id, username as author, title, body, created::text
+        FROM questions
+        LEFT JOIN users ON users.id=questions.author_id
+        WHERE questions.id = $1`,
+        [questionId]
+    );
+    if (questionResult.rowCount === 0) {
+        return null;
+    }
+
+    const { rows: questionAnswers } = await client.query(
+        `SELECT answers.id, users.username as author, body, created::text, COALESCE(votes, 0) AS votes, answer_votes.direction AS vote_direction
+        FROM answers
+        LEFT JOIN users ON users.id=answers.author_id
+        LEFT JOIN (
+            SELECT answer_id, SUM(direction) AS votes
+            FROM answer_votes
+            GROUP BY answer_id
+            ) AS votes ON answers.id=votes.answer_id
+        LEFT JOIN answer_votes ON (answer_votes.answer_id=answers.id AND answer_votes.user_id=$2)
+        WHERE question_id = $1
+        ORDER BY created DESC`,
+        [questionId, userId]
+    );
+    return {
+        ...questionResult.rows[0],
+        answers: questionAnswers
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            .map(({ id, author, body, created, votes, vote_direction }) => ({
+                id,
+                author,
+                body,
+                created,
+                votes: Number(votes),
+                voteDirection: vote_direction,
+            }))
+    };
+}
+
 router.get('/:id', async (req, res) => {
     const client = await pool.connect();
     try {
-        if (!isUuid(req.params.id)) {
-            res.status(404).json({ error: 'not found' });
-            return;
-        }
-        const questionResult = await client.query(
-            `SELECT questions.id, username as author, title, body, created
-            FROM questions
-            LEFT JOIN users ON users.id=questions.author_id
-            WHERE questions.id = $1`,
-            [req.params.id]
-        );
-        if (questionResult.rowCount === 0) {
-            res.status(404).json({ error: 'not found' });
-            return;
-        }
-
         const userId = getUserId(req, res, false);
-
-        const { rows: questionAnswers } = await client.query(
-            `SELECT answers.id, users.username as author, body, created, COALESCE(votes, 0) AS votes, answer_votes.direction AS vote_direction
-            FROM answers
-            LEFT JOIN users ON users.id=answers.author_id
-            LEFT JOIN (
-                SELECT answer_id, SUM(direction) AS votes
-                FROM answer_votes
-                GROUP BY answer_id
-                ) AS votes ON answers.id=votes.answer_id
-            LEFT JOIN answer_votes ON (answer_votes.answer_id=answers.id AND answer_votes.user_id=$2)
-            WHERE question_id = $1
-            ORDER BY created DESC`,
-            [req.params.id, userId]
-        );
-        const jsonResponse: api.Question = {
-            ...questionResult.rows[0],
-            answers: questionAnswers
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                .map(({ id, author, body, created, votes, vote_direction }) => ({
-                    id,
-                    author,
-                    body,
-                    created,
-                    votes: Number(votes),
-                    voteDirection: vote_direction,
-                }))
-        };
-        res.json(jsonResponse);
+        const question = await getQuestion(client, req.params.id, userId);
+        if (question !== null) {
+            res.json(question);
+        } else {
+            res.status(404).json({ error: 'not found' });
+        }
     } finally {
         client.release();
     }

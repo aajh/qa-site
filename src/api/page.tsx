@@ -11,8 +11,8 @@ import pg from 'pg';
 import { initialState, RootState } from '../slices';
 import createStore from '../store';
 import App from '../components/App';
-import { pool } from './common';
-import { getQuestionList } from './questions';
+import { pool, getUserId } from './common';
+import { getQuestionList, getQuestion } from './questions';
 
 async function getInitialState(req: express.Request, client: pg.ClientBase): Promise<RootState> {
     const state = _.cloneDeep(initialState);
@@ -68,6 +68,17 @@ async function renderPage(req: express.Request, state: RootState): Promise<strin
 
 const router = Router();
 
+async function getBasePage(req: express.Request, res: express.Response): Promise<void> {
+    const client = await pool.connect();
+    try {
+        const state = await getInitialState(req, client);
+        const page = await renderPage(req, state);
+        res.send(page);
+    } finally {
+        client.release();
+    }
+}
+
 router.get('/', async (req, res) => {
     const client = await pool.connect();
     try {
@@ -83,15 +94,32 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/*', async (req, res) => {
+router.get('/questions/ask', getBasePage);
+
+router.get('/questions/:id', async (req, res) => {
     const client = await pool.connect();
     try {
         const state = await getInitialState(req, client);
+
+        const userId = getUserId(req, res, false);
+        const question = await getQuestion(client, req.params.id, userId);
+
+        if (question === null) {
+            res.redirect('/404');
+            return;
+        }
+
+        state.question.question = question;
+        state.question.loading = false;
+        state.question.showExistingQuestion = true;
+
         const page = await renderPage(req, state);
         res.send(page);
     } finally {
         client.release();
     }
 });
+
+router.get('/*', getBasePage);
 
 export default router;

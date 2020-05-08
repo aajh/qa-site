@@ -56,7 +56,7 @@ export default function QuestionList(): React.ReactElement {
                             </Spinner>
                         </div>
                     )}
-                    {error && <Alert variant="warning">Error while loading questions. Please try to refresh the page.</Alert>}
+                    {error && <Alert variant="warning">Error while loading questions. Please try to refreshing the page.</Alert>}
                 </Col>
             </Row>
         </Container>

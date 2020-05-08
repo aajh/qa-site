@@ -181,14 +181,14 @@ export default function Question() {
     const dispatch = useDispatch();
     const history = useHistory();
     const { id } = useParams();
-    const { question, loading, questionWasPosted, loadingError } = useSelector(
+    const { question, loading, showExistingQuestion, loadingError } = useSelector(
         (state: RootState) => state.question
     );
     const loggedIn = useSelector((state: RootState) => state.user.user) !== null;
 
     useEffect(() => {
         if (id !== undefined) {
-            if (question?.id !== id || !questionWasPosted) {
+            if (question?.id !== id || !showExistingQuestion) {
                 dispatch(fetchQuestion({ id, history }));
             }
             dispatch(showQuestion(id));
