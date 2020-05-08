@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 
-
 dotenv.config();
 
 import api from './api';

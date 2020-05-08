@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import { StaticRouter } from 'react-router';
 
 import { initialState } from '../slices';
-import createStoreAndHistory from '../store';
+import createStore from '../store';
 import App from '../components/App';
 import { pool } from './common';
 
@@ -29,7 +29,7 @@ export default async function renderPage(req: express.Request): Promise<string> 
         }
     }
 
-    const { store } = createStoreAndHistory(state, req.url);
+    const store = createStore(state);
 
     const reactHtml = renderToString(
         <Provider store={store}>

@@ -1,23 +1,22 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { push, replace } from 'connected-react-router';
+import { History } from 'history';
 
-import { AppDispatch } from '../store';
 import { RootState } from './index';
 import * as api from '../api/types';
 
 export const fetchQuestion = createAsyncThunk<
 api.Question,
 {
-    id: string,
+    id: string
+    history: History
     redirectOn404?: boolean
 },
 {
-    dispatch: AppDispatch
     rejectValue: void
 }
 >(
     'question/fetch',
-    async ({ id, redirectOn404 = true }, { dispatch, rejectWithValue }) => {
+    async ({ id, history, redirectOn404 = true }, { rejectWithValue }) => {
         try {
             const response = await fetch(`/api/questions/${id}`, {
                 headers: {
@@ -25,7 +24,7 @@ api.Question,
                 },
             });
             if (response.status === 404 && redirectOn404) {
-                dispatch(replace('/404'));
+                history.replace('/404');
             }
             if (response.ok) {
                 const newQuestion: api.Question = await response.json();
@@ -42,17 +41,19 @@ api.Question,
 export const postQuestion = createAsyncThunk<
 api.Question,
 {
-    title: string,
-    body: string
+    question: {
+        title: string,
+        body: string
+    }
+    history: History
 },
 {
-    dispatch: AppDispatch,
     state: RootState,
     rejectValue: void
 }
 >(
     'question/postQuestion',
-    async (question, { dispatch, getState, rejectWithValue }) => {
+    async ({ question, history }, { getState, rejectWithValue }) => {
         try {
             const { user: { user } } = getState();
 
@@ -72,7 +73,7 @@ api.Question,
                 const createdQuestion: api.Question = await response.json();
 
                 // Give the reducer time to update
-                setTimeout(() => dispatch(push(`/questions/${createdQuestion.id}`)), 0);
+                setTimeout(() => history.push(`/questions/${createdQuestion.id}`), 0);
 
                 return createdQuestion;
             } else {

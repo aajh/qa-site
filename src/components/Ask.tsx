@@ -1,6 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router';
 import ReactMarkdown from 'react-markdown';
 import { Alert, Button, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 
@@ -16,6 +17,7 @@ type QuestionForm = {
 
 export default function Ask() {
     const dispatch = useDispatch();
+    const history = useHistory();
     const {
         postingQuestion,
         postingQuestionError
@@ -26,7 +28,7 @@ export default function Ask() {
     const body = watch('body');
 
     async function onSubmit(question: QuestionForm) {
-        dispatch(postQuestion(question));
+        dispatch(postQuestion({ question, history }));
     }
 
     const content = user !== null

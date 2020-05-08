@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
 import { Alert, Button, Col, Container, Form, ListGroup, Row, Spinner } from 'react-bootstrap';
@@ -179,6 +179,7 @@ function AnswerForm({ questionId } : { questionId: string }) {
 
 export default function Question() {
     const dispatch = useDispatch();
+    const history = useHistory();
     const { id } = useParams();
     const { question, loading, questionWasPosted, loadingError } = useSelector(
         (state: RootState) => state.question
@@ -188,7 +189,7 @@ export default function Question() {
     useEffect(() => {
         if (id !== undefined) {
             if (question?.id !== id || !questionWasPosted) {
-                dispatch(fetchQuestion({ id }));
+                dispatch(fetchQuestion({ id, history }));
             }
             dispatch(showQuestion(id));
         }
