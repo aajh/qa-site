@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
 import ReactMarkdown from 'react-markdown';
-import { Alert, Button, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
+import { Alert, Button, Col, Form, Row, Spinner } from 'react-bootstrap';
 
 import { postQuestion } from '../slices/questionSlice';
 import { RootState } from '../slices';
@@ -77,7 +77,7 @@ export default function Ask() {
         : <InlineLoginPrompt message="Please login to ask a question." />;
 
     return (
-        <Container className="py-5">
+        <main className="container py-5">
             <Row className="justify-content-center">
                 <Col md="8">
                     <h1>Ask a Question</h1>
@@ -91,6 +91,6 @@ export default function Ask() {
                     )}
                 </Col>
             </Row>
-        </Container>
+        </main>
     );
 }

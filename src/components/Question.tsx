@@ -20,6 +20,15 @@ function CaretUp({ filled, onClick }: { filled: boolean, onClick: () => void }) 
             {
                 filled
                     ? (
+                        <span className="sr-only">Undo vote up</span>
+                    )
+                    : (
+                        <span className="sr-only">Vote up</span>
+                    )
+            }
+            {
+                filled
+                    ? (
                         <svg className="bi bi-caret-up-fill" width={CARET_SIZE} height={CARET_SIZE} viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 00.753-1.659l-4.796-5.48a1 1 0 00-1.506 0z" />
                         </svg>
@@ -37,6 +46,15 @@ function CaretUp({ filled, onClick }: { filled: boolean, onClick: () => void }) 
 function CaretDown({ filled, onClick }: { filled: boolean, onClick: () => void }) {
     return (
         <button type="button" className="vote-down btn" onClick={onClick} style={{ padding: 0 }}>
+            {
+                filled
+                    ? (
+                        <span className="sr-only">Undo vote down</span>
+                    )
+                    : (
+                        <span className="sr-only">Vote down</span>
+                    )
+            }
             {
                 filled
                     ? (
@@ -209,7 +227,7 @@ export default function Question() {
         });
 
         questionDetails = (
-            <div>
+            <main>
                 <Row>
                     <Col>
                         <h2>{question.title}</h2>
@@ -250,7 +268,7 @@ export default function Question() {
                             : <InlineLoginPrompt message="Please login to answer the question" />}
                     </Col>
                 </Row>
-            </div>
+            </main>
         );
     }
 

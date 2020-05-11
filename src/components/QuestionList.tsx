@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Alert, Col, Container, ListGroup, Row, Spinner } from 'react-bootstrap';
+import { Alert, Col, ListGroup, Row, Spinner } from 'react-bootstrap';
 
 import { fetchQuestionList } from '../slices/questionListSlice';
 import { RootState } from '../slices';
@@ -44,7 +44,7 @@ export default function QuestionList(): React.ReactElement {
         : null;
 
     return (
-        <Container className="py-5">
+        <main className="container py-5">
             <Row className="justify-content-center">
                 <Col md="10">
                     <h1 className="pb-1">Questions</h1>
@@ -59,6 +59,6 @@ export default function QuestionList(): React.ReactElement {
                     {error && <Alert variant="warning">Error while loading questions. Please try to refreshing the page.</Alert>}
                 </Col>
             </Row>
-        </Container>
+        </main>
     );
 }
