@@ -1,5 +1,10 @@
 # qa-site
-A question and answer site
+A question and answer site build with React, Redux and Typescript with Node.js express backend.
+
+Features:
+- Question asking and answering with voting for the answers
+- User login and registration
+- Server side rendering
 
 ## Usage
 
@@ -20,13 +25,12 @@ To run the development server, only `DEV_DATABASE_URL` is required from the data
 `DATABASE_URL` is used as the production database and to run migrations for it and `TEST_DATABASE_URL` is used by the test server.
 The format for the URL is `postgres://<username>:<password>@<host>:<port>/<database>`, for example, `postgres://postgres:postgres@localhost:5432/qa_site_dev`.
 
-In the project root run:
+To start the development server on http://localhost:8080, run:
 ```
 npm install
 db-migrate up
 npm run start:dev
 ```
-This starts the development server on http://localhost:8080.
 
 If needed, run `db-migrate up:test` to populate the database with test data.
 
