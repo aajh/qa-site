@@ -9,7 +9,7 @@ const router = Router();
 
 export async function getQuestionList(client: pg.ClientBase): Promise<api.QuestionSummary[]> {
     const { rows } = await client.query<api.QuestionSummary>(
-        `SELECT questions.id, username as author, title, created
+        `SELECT questions.id, username as author, title, created::text
         FROM questions
         LEFT JOIN users ON users.id=questions.author_id
         ORDER BY created DESC`
@@ -58,7 +58,7 @@ export async function getQuestion(
             ) AS votes ON answers.id=votes.answer_id
         LEFT JOIN answer_votes ON (answer_votes.answer_id=answers.id AND answer_votes.user_id=$2)
         WHERE question_id = $1
-        ORDER BY created DESC`,
+        ORDER BY votes DESC, created ASC`,
         [questionId, userId]
     );
     return {

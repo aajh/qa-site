@@ -175,6 +175,12 @@ export const voteAnswer = createAsyncThunk<
 );
 
 
+function compareAnswers(a: api.Answer, b: api.Answer): number {
+    const votes = b.votes - a.votes;
+    return votes !== 0 ? votes : (new Date(a.created)).getTime() - (new Date(b.created)).getTime();
+}
+
+
 interface QuestionState {
     question: api.Question | null
     loading: boolean
@@ -257,6 +263,7 @@ const question = createSlice({
         builder.addCase(postAnswer.fulfilled, (state, { payload }) => {
             if (state.question?.id === payload.questionId) {
                 state.question.answers.push(payload.answer);
+                state.question.answers.sort(compareAnswers);
             }
             state.postingAnswer = false;
             state.postingAnswerError = false;
@@ -273,6 +280,8 @@ const question = createSlice({
                     if (answer !== undefined) {
                         answer.votes += (direction ?? 0) - (answer.voteDirection ?? 0);
                         answer.voteDirection = direction;
+
+                        state.question.answers.sort(compareAnswers);
                     }
                 }
             });
