@@ -1,5 +1,5 @@
 # qa-site
-A question and answer site build with React, Redux and Typescript with Node.js express backend.
+A question and answer site build with React, Redux and Typescript with Node.js express backend. The site is deployed at https://enigmatic-waters-82684.herokuapp.com/.
 
 Features:
 - Question asking and answering with voting for the answers
@@ -7,11 +7,6 @@ Features:
 - Server side rendering
 
 ## Usage
-
-Install [db-migrate](https://www.npmjs.com/package/db-migrate) to run database migrations:
-```
-npm install -g db-migrate
-```
 
 Create a `.env` file with variables:
 ```
@@ -28,11 +23,11 @@ The format for the URL is `postgres://<username>:<password>@<host>:<port>/<datab
 To start the development server on http://localhost:8080, run:
 ```
 npm install
-db-migrate up
+npx db-migrate up
 npm run start:dev
 ```
 
-If needed, run `db-migrate up:test` to populate the database with test data.
+If needed, run `npx db-migrate up:test` to populate the database with test data.
 
 
 ## Running tests
@@ -49,6 +44,6 @@ To start the production server, run:
 ```
 npm install
 npm run build
-db-migrate up -e production
+npx db-migrate up -e production
 npm run start
 ```
