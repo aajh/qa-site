@@ -1,10 +1,11 @@
 # qa-site
-A question and answer site build with React, Redux and Typescript with Node.js express backend. The site is deployed at https://enigmatic-waters-82684.herokuapp.com/.
+A question and answer site build with React, Redux and Typescript with Node.js express backend. The site is deployed at https://enigmatic-waters-82684.herokuapp.com.
 
 Features:
 - Question asking and answering with voting for the answers
 - User login and registration
 - Server side rendering
+- Integration testing with Cypress
 
 ## Usage
 
