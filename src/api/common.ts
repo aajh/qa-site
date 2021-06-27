@@ -12,7 +12,7 @@ const connectionString = databaseUrl + (process.env.NODE_ENV === 'production' ? 
 
 export const pool = new pg.Pool({
     connectionString,
-    ssl: process.env.NODE_ENV === 'production',
+    ssl:  process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
 });
 
 export function getUserId(
