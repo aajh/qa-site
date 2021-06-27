@@ -7,9 +7,10 @@ const connectionVariables: Record<string, string> = {
     production: 'DATABASE_URL'
 };
 
-export const pool = new pg.Pool({
-    connectionString: process.env[connectionVariables[process.env.NODE_ENV ?? 'development']]
-});
+const databaseUrl = process.env[connectionVariables[process.env.NODE_ENV ?? 'development']];
+const connectionString = databaseUrl + (process.env.NODE_ENV === 'production' ? '?sslmode=require' : '');
+
+export const pool = new pg.Pool({ connectionString });
 
 export function getUserId(
     req: express.Request,
